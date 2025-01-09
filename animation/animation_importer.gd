@@ -52,6 +52,9 @@ func create_animation_resource():
 							anim.track_set_key_value(hips_pos_track,key,hips_pos)
 				#assuming theres only 1 animation per fbx file (standard mixamo output)
 				anim_lib.add_animation(file_name.get_file().get_basename(),anim)
+	
+	if not DirAccess.dir_exists_absolute(output_folder):
+		DirAccess.make_dir_recursive_absolute(output_folder)
 	var file_name = output_folder.path_join(output_name+".res")
 	var increment = 2
 	while FileAccess.file_exists(file_name):
