@@ -65,7 +65,7 @@ text = "Output Folder  - "
 [node name="Output_Folder" type="Label" parent="VBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "res://humanizer_assets/animation"
+text = "res://humanizer/animation"
 
 [node name="FileDialog" type="FileDialog" parent="VBoxContainer/HBoxContainer2"]
 auto_translate_mode = 1
