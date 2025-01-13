@@ -38,6 +38,7 @@ func init_options():
 		%MHCLO_FileLoader.file_selected.connect(fill_options)
 	%MHCLO_FileLoader.current_dir = HumanizerGlobalConfig.config.asset_import_paths[-1].path_join("equipment")
 	
+	%SkeletonOptions.clear()
 	%SkeletonOptions.add_item(" -- Select Skeleton --")
 	var rigs = HumanizerRegistry.rigs
 	for rig in rigs:
@@ -90,12 +91,12 @@ func fill_material_options():
 	options.clear()
 	options.add_item(" -- None (Random) --")
 	options.set_item_metadata(0,"")
-	var mat_list = HumanizerMaterialService.search_for_materials(get_mhclo_path())
+	var mat_list = HumanizerMaterialImportService.search_for_materials(get_mhclo_path())
 	mat_list = mat_list.materials
 	#print(mat_list)
 	for mat_id in mat_list:
-		var mat_res = HumanizerResourceService.load_resource(mat_list[mat_id])
-		var mat_name = mat_res.resource_name
+		#var mat_res = HumanizerResourceService.load_resource(mat_list[mat_id])
+		var mat_name = mat_id # because materials wont have been loaded yet
 		var idx = options.item_count
 		options.add_item(mat_name)
 		options.set_item_metadata(idx,mat_id)
@@ -153,8 +154,8 @@ func import_asset():
 	import_settings.slots = slot_list
 	import_settings.mhclo = %MHCLO_Label.text 
 	import_settings.display_name = %DisplayName.text 
+	var string_id = import_settings.mhclo.get_basename().get_file()
 	if import_settings.display_name.strip_edges() == "":
-		var string_id = import_settings.mhclo.get_basename().get_file()
 		printerr("No display name set, using string ID " + string_id) 
 	var select_material = %DefaultMaterial.selected
 	import_settings.default_material = %DefaultMaterial.get_item_metadata(select_material)
@@ -163,7 +164,11 @@ func import_asset():
 	for hbox in %BoneList.get_children():
 		var label = hbox.get_node("Label")
 		import_settings.attach_bones.append(label.text)
-	var save_file = HumanizerEquipmentImportService.get_import_settings_path(get_mhclo_path())
-	HumanizerResourceService.save_resource(save_file,import_settings)
-	HumanizerEquipmentImportService.import(save_file)
+	#var save_file = HumanizerEquipmentImportService.get_import_settings_path(get_mhclo_path())
+	
+	var save_path:String = "res://data/generated/equipment/" + string_id + "/import_settings.json"
+	if not DirAccess.dir_exists_absolute(save_path.get_base_dir()):
+		DirAccess.make_dir_absolute(save_path.get_base_dir())
+	HumanizerResourceService.save_resource(save_path,import_settings)
+	HumanizerEquipmentImportService.import(save_path)
 	#HumanizerRegistry.load_all()

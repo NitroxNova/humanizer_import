@@ -7,7 +7,7 @@ static func import(json_path:String,import_materials:=true):
 	var folder = json_path.get_base_dir()
 	if import_materials:
 		#generate material files
-		HumanizerMaterialService.import_materials(folder)
+		HumanizerMaterialImportService.import_materials(settings.mhclo.get_base_dir(),settings.mhclo.get_file().get_basename())
 	#load mhclo
 	var mhclo := MHCLO.new()
 	mhclo.parse_file(settings.mhclo)
@@ -21,7 +21,7 @@ static func import(json_path:String,import_materials:=true):
 	equip_type.resource_name = mhclo.resource_name
 	equip_type.default_material = settings.default_material
 	var save_path = folder.path_join(equip_type.resource_name + '.res')
-	var mats = HumanizerMaterialService.search_for_materials(mhclo.mhclo_path)
+	var mats = HumanizerMaterialImportService.search_for_materials(mhclo.mhclo_path)
 	equip_type.textures = mats.materials
 	equip_type.overlays = mats.overlays
 	equip_type.display_name = settings.display_name
@@ -30,7 +30,7 @@ static func import(json_path:String,import_materials:=true):
 	for slot in settings.slots:
 		equip_type.slots.append(slot)
 	if equip_type.slots.is_empty():
-		printerr("Warning - " + equip_type.resource_name + " has no equipment slots, you can manually add them to the resource file.")
+		printerr("Warning - " + equip_type.resource_name + " has no equipment slots")
 	
 	_calculate_bone_weights(mhclo,settings)
 	
@@ -75,7 +75,7 @@ static func load_import_settings(mhclo_path:String):
 		if version < 1.1:
 			var mhclo := MHCLO.new()
 			mhclo.parse_file(mhclo_path)
-			settings.default_material = HumanizerMaterialService.default_material_from_mhclo(mhclo)
+			settings.default_material = HumanizerMaterialImportService.default_material_from_mhclo(mhclo)
 			settings.version = 1.1
 	else:
 		settings.mhclo = mhclo_path
@@ -83,7 +83,7 @@ static func load_import_settings(mhclo_path:String):
 		settings.attach_bones = []
 		var mhclo := MHCLO.new()
 		mhclo.parse_file(mhclo_path)
-		settings.default_material = HumanizerMaterialService.default_material_from_mhclo(mhclo)
+		settings.default_material = HumanizerMaterialImportService.default_material_from_mhclo(mhclo)
 		#print("loading resource")
 		#try new resource naming convention first
 		var res_path = get_equipment_resource_path(mhclo_path)
@@ -129,7 +129,7 @@ static func import_all():
 	#since there are nested folders, want to delete everything first then regenerate
 	for path in HumanizerGlobalConfig.config.asset_import_paths:
 		for dir in OSPath.get_dirs(path.path_join('equipment')):
-			HumanizerMaterialService.import_materials(dir)
+			HumanizerMaterialImportService.import_materials(dir,"import_all")
 			import_folder(dir)
 			
 	print("Reloading Registry")
@@ -181,7 +181,7 @@ static func _calculate_bone_weights(mhclo:MHCLO,import_settings:Dictionary):
 			
 static func _build_import_mesh(path: String, mhclo: MHCLO) -> ArrayMesh: 
 	# build basis from obj file
-	var obj_path = path.path_join(mhclo.obj_file_name)
+	var obj_path = mhclo.mhclo_path.get_base_dir().path_join(mhclo.obj_file_name)
 	var obj_mesh := ObjToMesh.new(obj_path).run()
 	var mesh = obj_mesh.mesh
 	mhclo.mh2gd_index = obj_mesh.mh2gd_index
