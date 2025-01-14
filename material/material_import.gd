@@ -7,7 +7,9 @@ static func import_materials(folder:String,equip_id:String):
 	for file_name in OSPath.get_files(folder):
 		if file_name.get_extension() == "mhmat":
 			var new_mat = mhmat_to_material(file_name)
-			var mat_path = "res://data/generated/material/" + equip_id.path_join( file_name.get_file().replace('.mhmat','.material.res'))
+			var mat_path = "res://data/generated/material/" + equip_id
+			mat_path = mat_path.path_join( file_name.get_file().get_basename())
+			mat_path = mat_path.path_join("standard_material.res")
 			HumanizerResourceService.save_resource(mat_path,new_mat)
 
 static func search_for_materials(mhclo_path:String):

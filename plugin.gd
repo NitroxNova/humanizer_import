@@ -34,17 +34,43 @@ func run_equipment_importer():
 func generate_zip():
 	print("generating zip file")
 	var writer := ZIPPacker.new()
-	var err := writer.open("res://humanizer_mod.zip")
+	var err := writer.open("res://export/humanizer_mod.zip")
 	if err != OK:
 		return err
-	var contents = _get_files_recursive("res://humanizer/")
-	for file in contents:
-		var local_path = file.replace("res://","")
-		writer.start_file(local_path)
-		writer.write_file(FileAccess.get_file_as_bytes(file))
-		writer.close_file()
+	var contents = _get_files_recursive("res://data/generated/")
+	for file_path in contents:
+		var local_path = file_path.replace("res://data/generated","humanizer")
+		if file_path.get_file() == "standard_material.res":
+			var material : StandardMaterial3D = load(file_path)
+			var material_data := {}
+			var blank_mat = StandardMaterial3D.new()
+			for prop in material.get_property_list():
+				var prop_value = material.get(prop.name)
+				if prop_value != blank_mat.get(prop.name) and prop.name != "resource_path":
+					if prop_value is CompressedTexture2D:
+						var t_id = prop.name.replace("_texture","")
+						var new_texture_path = local_path.get_base_dir().path_join(t_id+ ".png")
+						zip_writer_copy_file(writer,prop_value.resource_path,new_texture_path)
+						material_data[prop.name] = "res://" + new_texture_path
+						
+					else:
+						material_data[prop.name] = prop_value
+			zip_writer_save_json(writer,material_data,local_path.get_base_dir().path_join("standard_material.json"))
+		else:
+			zip_writer_copy_file(writer,file_path,local_path)
+		
 	writer.close()
 	#return OK
+	
+func zip_writer_save_json(writer:ZIPPacker,data,new_path:String):
+	writer.start_file(new_path)
+	writer.write_file(JSON.stringify(data).to_utf8_buffer())
+	writer.close_file()
+
+func zip_writer_copy_file(writer:ZIPPacker, old_path,new_path):
+	writer.start_file(new_path)
+	writer.write_file(FileAccess.get_file_as_bytes(old_path))
+	writer.close_file()
 	
 func _get_files_recursive(path:String):
 	var paths = []
