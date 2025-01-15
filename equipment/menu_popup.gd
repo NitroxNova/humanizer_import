@@ -19,7 +19,6 @@ func _on_close_requested() -> void:
 	queue_free()
 
 func init_options():
-	close_requested.connect(_on_close_requested)
 	slot_boxes = {}
 	for slots_cat:HumanizerSlotCategory in HumanizerGlobalConfig.config.equipment_slots:
 		var label = Label.new()

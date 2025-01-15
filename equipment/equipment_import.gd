@@ -52,9 +52,9 @@ static func import(json_path:String,import_materials:=true):
 	HumanizerRegistry.add_equipment_type(equip_type)	
 
 static func get_import_settings_path(mhclo_path)->String:
-	var json_path = mhclo_path.get_basename()
-	json_path += ".import_settings.json"
-	#print(save_file)
+	var equip_id = mhclo_path.get_file().get_basename()
+	var json_path = "res://data/generated/equipment/" + equip_id + "/import_settings.json"
+	print(json_path)
 	return json_path
 
 static func get_equipment_resource_path(mhclo_path)->String:

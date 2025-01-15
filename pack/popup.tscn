@@ -1,0 +1,51 @@
+[gd_scene load_steps=2 format=3 uid="uid://dnl8hvo7alswh"]
+
+[ext_resource type="Script" path="res://addons/humanizer_import/pack/popup.gd" id="1_nf4i0"]
+
+[node name="Popup" type="Window"]
+initial_position = 1
+size = Vector2i(331, 609)
+wrap_controls = true
+script = ExtResource("1_nf4i0")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="SelectPack" type="OptionButton" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+selected = 0
+item_count = 1
+popup/item_0/text = "-- New Pack --"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Pack Name: "
+
+[node name="Pack_Name" type="TextEdit" parent="VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+placeholder_text = "New_Pack"
+scroll_fit_content_height = true
+
+[node name="Label2" type="Label" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = ".zip"
+
+[node name="Contents_Tree" type="Tree" parent="VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 500)
+layout_mode = 2
+
+[node name="Generate" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "-- Generate --"
+
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]
+[connection signal="item_selected" from="VBoxContainer/SelectPack" to="." method="_on_select_pack_item_selected"]
+[connection signal="pressed" from="VBoxContainer/Generate" to="." method="_on_generate_pressed"]
