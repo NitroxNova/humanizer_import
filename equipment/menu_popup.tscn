@@ -45,6 +45,17 @@ text = "Default Material "
 unique_name_in_owner = true
 layout_mode = 2
 
+[node name="HBoxContainer3" type="HBoxContainer" parent="ImportOptions"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ImportOptions/HBoxContainer3"]
+layout_mode = 2
+text = "Material Override "
+
+[node name="MaterialOverride" type="OptionButton" parent="ImportOptions/HBoxContainer3"]
+unique_name_in_owner = true
+layout_mode = 2
+
 [node name="SlotsContainer" type="VBoxContainer" parent="ImportOptions"]
 unique_name_in_owner = true
 layout_mode = 2

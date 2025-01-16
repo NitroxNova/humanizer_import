@@ -7,7 +7,7 @@ static func import(json_path:String,import_materials:=true):
 	var folder = json_path.get_base_dir()
 	if import_materials:
 		#generate material files
-		HumanizerMaterialImportService.import_materials(settings.mhclo.get_base_dir(),settings.mhclo.get_file().get_basename())
+		HumanizerMaterialImportService.import_materials(settings.mhclo.get_file().get_basename())
 	#load mhclo
 	var mhclo := MHCLO.new()
 	mhclo.parse_file(settings.mhclo)
@@ -20,6 +20,7 @@ static func import(json_path:String,import_materials:=true):
 	equip_type.path = folder
 	equip_type.resource_name = mhclo.resource_name
 	equip_type.default_material = settings.default_material
+	equip_type.material_override = settings.material_override
 	var save_path = folder.path_join(equip_type.resource_name + '.res')
 	var mats = HumanizerMaterialImportService.search_for_materials(mhclo.mhclo_path)
 	equip_type.textures = mats.materials
@@ -54,7 +55,7 @@ static func import(json_path:String,import_materials:=true):
 static func get_import_settings_path(mhclo_path)->String:
 	var equip_id = mhclo_path.get_file().get_basename()
 	var json_path = "res://data/generated/equipment/" + equip_id + "/import_settings.json"
-	print(json_path)
+	#print(json_path)
 	return json_path
 
 static func get_equipment_resource_path(mhclo_path)->String:
@@ -72,36 +73,19 @@ static func load_import_settings(mhclo_path:String):
 		if "version" not in settings:
 			settings.version = 1.0
 		var version = float(settings.version)
-		if version < 1.1:
-			var mhclo := MHCLO.new()
-			mhclo.parse_file(mhclo_path)
-			settings.default_material = HumanizerMaterialImportService.default_material_from_mhclo(mhclo)
-			settings.version = 1.1
+		
 	else:
+		settings.version = 1.0
 		settings.mhclo = mhclo_path
 		settings.slots = []
 		settings.attach_bones = []
 		var mhclo := MHCLO.new()
 		mhclo.parse_file(mhclo_path)
-		settings.default_material = HumanizerMaterialImportService.default_material_from_mhclo(mhclo)
-		#print("loading resource")
-		#try new resource naming convention first
-		var res_path = get_equipment_resource_path(mhclo_path)
-		if not FileAccess.file_exists(res_path):
-			#old naming convention has to be loaded from mhclo
-			res_path = mhclo_path.get_base_dir()
-			res_path = res_path.path_join(mhclo.display_name + ".res")
-		#print(res_path)
-		if FileAccess.file_exists(res_path):
-			var equip_res : HumanizerEquipmentType = load(res_path)
-			for slot in equip_res.slots:
-				settings.slots.append(slot)
-			
+		settings.material_override = search_for_material_override(mhclo_path)
+		#print(settings.material_override)
+		settings.default_material = HumanizerMaterialImportService.default_material_from_mhclo(mhclo)	
 		settings.display_name = mhclo.display_name
 		settings.rigged_glb = search_for_rigged_glb(mhclo_path)
-		for tag in mhclo.tags:
-			if tag.begins_with("bone_name "):
-				settings.attach_bones.append(tag.split(" ")[1])
 				
 	#override the slots from the folder - so if config changes they all update
 	var slots_ovr = HumanizerGlobalConfig.config.get_folder_override_slots(mhclo_path)
@@ -112,7 +96,16 @@ static func load_import_settings(mhclo_path:String):
 	
 	return settings
 
-
+static func search_for_material_override(mhclo_path:String):
+	# for equipment that shares materials, such as Left and Right (Eyes, Eyebrows..) and the Body Proxies, or outfits that have been separated
+	#they have to be placed in the same input folder to be automatically detected, otherwise, manually set in the 'material_overide' dropdown
+	for file in DirAccess.get_files_at( mhclo_path.get_base_dir()):
+		#if this is not the first mhclo in the folder, set the material_override to the first mhclo
+		if file.get_extension() == "mhclo":
+			if file == mhclo_path.get_file():
+				return ""
+			else:
+				return file.get_basename()
 
 static func search_for_rigged_glb(mhclo_path:String)->String:
 	var glb_path = mhclo_path.get_basename() + ".glb"
@@ -122,19 +115,15 @@ static func search_for_rigged_glb(mhclo_path:String)->String:
 	return ""
 	
 static func import_all():
+	print("Importing all Equipment")
 	#first, look for mhclos without settings.json , want to copy those settings before deleting the resource
-	for path in HumanizerGlobalConfig.config.asset_import_paths:
-		for dir in OSPath.get_dirs(path.path_join('equipment')):
-			scan_for_missing_import_settings(dir)
-	#since there are nested folders, want to delete everything first then regenerate
-	for path in HumanizerGlobalConfig.config.asset_import_paths:
-		for dir in OSPath.get_dirs(path.path_join('equipment')):
-			HumanizerMaterialImportService.import_materials(dir,"import_all")
-			import_folder(dir)
+	scan_for_missing_import_settings("res://data/input/equipment")
+	
+	#now that all import_settings.json and folder has been created..
+	for equip_id in DirAccess.get_directories_at("res://data/generated/equipment"):
+		HumanizerMaterialImportService.import_materials(equip_id)
+		import("res://data/generated/equipment/"+equip_id+"/import_settings.json")
 			
-	print("Reloading Registry")
-	HumanizerRegistry.load_all()
-	print('Done')
 
 static func import_folder(path):
 	for folder in OSPath.get_dirs(path):
@@ -151,7 +140,8 @@ static func scan_for_missing_import_settings(path,clean=true):
 	for file in OSPath.get_files(path):
 		if file.get_extension() == "mhclo":
 			#need to rewrite json incase slots categories have been updated
-			var settings_path = file.replace(".mhclo",".import_settings.json")
+			var settings_path = "res://data/generated/equipment/"
+			settings_path += file.get_file().get_basename() + "/import_settings.json"
 			var equip_settings = HumanizerEquipmentImportService.load_import_settings(file)
 			HumanizerResourceService.save_resource(settings_path,equip_settings)
 	#now that the import settings are copied, can delete any .res files

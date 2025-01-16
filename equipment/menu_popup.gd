@@ -104,6 +104,18 @@ func fill_material_options():
 		var mat_id = options.get_item_metadata(idx)
 		if mat_id == import_settings.default_material:
 			options.selected = idx
+
+func fill_material_override_options():
+	var options: OptionButton = %MaterialOverride
+	options.clear()
+	options.add_item("")
+	var file_list = OSPath.get_files_recursive("res://data/input/equipment")
+	for file_name in file_list:
+		if file_name.get_extension() == "mhclo":
+			var equip_id = file_name.get_file().get_basename()
+			options.add_item(equip_id)
+			if import_settings.material_override == equip_id:
+				options.selected = options.item_count - 1
 		
 func fill_options(mhclo_path:String=""):
 	#print("fill options")
@@ -116,9 +128,9 @@ func fill_options(mhclo_path:String=""):
 		child.queue_free()
 	%GLB_Label.text = ""
 	%LoadRiggedGLB.current_dir = mhclo_path.get_base_dir()
-	
 	import_settings = HumanizerEquipmentImportService.load_import_settings(mhclo_path)
 	fill_material_options()
+	fill_material_override_options()
 	var folder_override = HumanizerGlobalConfig.config.get_folder_override_slots(mhclo_path)
 	
 	if folder_override.is_empty():

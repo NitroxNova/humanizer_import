@@ -1,10 +1,16 @@
 extends Resource
 class_name HumanizerMaterialImportService
 
-static func import_materials(folder:String,equip_id:String):
-	for subfolder in OSPath.get_dirs(folder):
-		import_materials(subfolder,equip_id)
-	for file_name in OSPath.get_files(folder):
+static func import_materials(equip_id:String):
+	var json_path = "res://data/generated/equipment/" + equip_id + "/import_settings.json"
+	var settings = OSPath.read_json(json_path)
+	if not settings.material_override == "":
+		#materials will be imported by overriding equipment
+		return
+	var mhclo_path = settings.mhclo
+	
+	#var equip_path = "res://data/g/equipment".path_join(equip_id)
+	for file_name in OSPath.get_files_recursive(mhclo_path.get_base_dir()):
 		if file_name.get_extension() == "mhmat":
 			var new_mat = mhmat_to_material(file_name)
 			var mat_path = "res://data/generated/material/" + equip_id

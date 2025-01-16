@@ -11,13 +11,23 @@ func _add_tool_submenu():
 	var popup_menu = PopupMenu.new()
 	popup_menu.add_item("Animations")
 	popup_menu.set_item_metadata(popup_menu.item_count-1,run_animation_importer)
-	popup_menu.add_item("Equipment")
-	popup_menu.set_item_metadata(popup_menu.item_count-1,run_equipment_importer)
+	
+	
+	var equipment_menu = PopupMenu.new()
+	equipment_menu.name = "equipment"
+	equipment_menu.add_item("Manual Import")
+	equipment_menu.set_item_metadata(equipment_menu.item_count-1,run_equipment_importer)
+	equipment_menu.add_item("Import All")
+	equipment_menu.set_item_metadata(equipment_menu.item_count-1,HumanizerEquipmentImportService.import_all)
+	popup_menu.add_child(equipment_menu)
+	popup_menu.add_submenu_item('Equipment', 'equipment')
+	
 	popup_menu.add_item("Generate ZIP")
 	popup_menu.set_item_metadata(popup_menu.item_count-1,generate_zip)
 	add_tool_submenu_item('Humanizer Import', popup_menu)
 
 	popup_menu.id_pressed.connect(handle_menu_event.bind(popup_menu))
+	equipment_menu.id_pressed.connect(handle_menu_event.bind(equipment_menu))
 
 func handle_menu_event(id:int,popup_menu:PopupMenu):
 	var callable : Callable = popup_menu.get_item_metadata(id)
