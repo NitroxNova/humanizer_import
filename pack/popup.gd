@@ -24,24 +24,27 @@ func fill_contents_tree(selected:Array):
 	tree.hide_root = true
 	var equip_tree = tree.create_item(root)
 	equip_tree.set_text(0,"Equipment / Materials")
-	var equip_path = "res://data/generated/equipment"
-	for equip_id in DirAccess.get_directories_at(equip_path):
+	for equip_id in HumanizerEquipmentImportService.get_generated_equipment_ids():
 		var equip:TreeItem = tree.create_item(equip_tree)
 		equip.set_cell_mode(0,TreeItem.CELL_MODE_CHECK)
 		equip.set_editable(0,true)
 		equip.set_text(0,equip_id)
-		var meta = equip_path.path_join(equip_id)
+		var meta = "res://data/generated/equipment/" + equip_id + "/" + equip_id + ".res" 
 		equip.set_metadata(0,meta)
 		if meta in selected:
 			equip.set_checked(0,true)
 		var mat_path = "res://data/generated/material/" + equip_id
-		if DirAccess.dir_exists_absolute(mat_path):
-			for mat_id in DirAccess.get_directories_at(mat_path):
+		
+		var files = OSPath.get_files_recursive(mat_path)
+		files.append_array(OSPath.get_files_recursive("res://data/input/material/" + equip_id))
+		for mat_file in files:
+			if mat_file.get_extension() == "res":
+				var mat_id = mat_file.get_file().get_basename()
 				var mat:TreeItem = tree.create_item(equip)
 				mat.set_cell_mode(0,TreeItem.CELL_MODE_CHECK)
 				mat.set_editable(0,true)
 				mat.set_text(0,mat_id)
-				var mat_meta = mat_path.path_join(mat_id)
+				var mat_meta = mat_file
 				mat.set_metadata(0,mat_meta)
 				if mat_meta in selected:
 					mat.set_checked(0,true)

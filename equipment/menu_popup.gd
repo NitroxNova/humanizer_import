@@ -177,7 +177,7 @@ func import_asset():
 		import_settings.attach_bones.append(label.text)
 	#var save_file = HumanizerEquipmentImportService.get_import_settings_path(get_mhclo_path())
 	
-	var save_path:String = "res://data/generated/equipment/" + string_id + "/import_settings.json"
+	var save_path:String = HumanizerEquipmentImportService.get_import_settings_path(get_mhclo_path().get_file().get_basename())
 	if not DirAccess.dir_exists_absolute(save_path.get_base_dir()):
 		DirAccess.make_dir_absolute(save_path.get_base_dir())
 	HumanizerResourceService.save_resource(save_path,import_settings)

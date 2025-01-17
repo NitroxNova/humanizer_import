@@ -2,7 +2,7 @@ extends Resource
 class_name HumanizerMaterialImportService
 
 static func import_materials(equip_id:String):
-	var json_path = "res://data/generated/equipment/" + equip_id + "/import_settings.json"
+	var json_path = HumanizerEquipmentImportService.get_import_settings_path(equip_id)
 	var settings = OSPath.read_json(json_path)
 	if not settings.material_override == "":
 		#materials will be imported by overriding equipment
@@ -13,53 +13,37 @@ static func import_materials(equip_id:String):
 	for file_name in OSPath.get_files_recursive(mhclo_path.get_base_dir()):
 		if file_name.get_extension() == "mhmat":
 			var new_mat = mhmat_to_material(file_name)
+			var mat_id = file_name.get_file().get_basename()
 			var mat_path = "res://data/generated/material/" + equip_id
-			mat_path = mat_path.path_join( file_name.get_file().get_basename())
-			mat_path = mat_path.path_join("standard_material.res")
+			mat_path = mat_path.path_join(mat_id + ".res")
 			HumanizerResourceService.save_resource(mat_path,new_mat)
 
 static func search_for_materials(mhclo_path:String):
 	var materials = {}
 	var overlays = {}
-	var equip_type = mhclo_path.get_file().get_basename().get_basename() #get rid of both .mhclo.res extensions
-	var sub_mats = get_manual_materials(mhclo_path)
+	var equip_id = mhclo_path.get_file().get_basename().get_basename() #get rid of both .mhclo.res extensions
+	var sub_mats = get_manual_materials(equip_id)
 	materials.merge(sub_mats.materials)
 	overlays.merge(sub_mats.overlays)
 	#search for the generated materials after, so custom materials are first in the list
 	materials.merge(search_for_generated_materials(mhclo_path.get_base_dir()))
 	return {materials=materials,overlays=overlays}	
 
-static func get_manual_materials(mhclo_path:String): #custom defined materials
+static func get_manual_materials(equip_id:String): #custom defined materials
 	var materials = {}
 	var overlays = {}
-	#print("search for manual materials")
-	var string_id = mhclo_path.get_file().get_basename()
 	
-	var materials_path = "res://data/input/materials/" + string_id
-	var sub_mats = recursive_search_for_manual_materials(materials_path)
-	#merge is not recursive
-	materials.merge(sub_mats.materials)
-	overlays.merge(sub_mats.overlays)
-	
-	return {materials=materials,overlays=overlays}
-	
-static func recursive_search_for_manual_materials(path:String):
-	var materials = {}
-	var overlays = {}
-	for subfolder in OSPath.get_dirs(path):
-		var sub_mats = recursive_search_for_manual_materials(subfolder)
-		materials.merge(sub_mats.materials)	
-		overlays.merge(sub_mats.overlays)	
-	# top folder should override if conflicts
-	for mat_file in OSPath.get_files(path):
+	var materials_path = "res://data/input/material/" + equip_id
+	for mat_file in OSPath.get_files_recursive(materials_path):
 		if mat_file.get_extension() == "res":
 			var mat_res = HumanizerResourceService.load_resource(mat_file)
 			if mat_res is HumanizerMaterial or mat_res is StandardMaterial3D:
 				materials[mat_file.get_file().get_basename().get_basename()] = mat_file
 			elif mat_res is HumanizerOverlay:
 				overlays[mat_file.get_file().get_basename()] = mat_file
-	return {materials=materials,overlays=overlays}		
-
+	
+	return {materials=materials,overlays=overlays}
+	
 static func search_for_generated_materials(folder:String)->Dictionary:
 	var materials = {}
 	for subfolder in OSPath.get_dirs(folder):

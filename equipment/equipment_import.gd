@@ -3,7 +3,8 @@ class_name HumanizerEquipmentImportService
 
 static func import(json_path:String,import_materials:=true):
 	#load settings
-	var settings = HumanizerResourceService.load_resource(json_path)
+	#print(json_path)
+	var settings = OSPath.read_json(json_path)
 	var folder = json_path.get_base_dir()
 	if import_materials:
 		#generate material files
@@ -52,8 +53,7 @@ static func import(json_path:String,import_materials:=true):
 	#add main resource to registry
 	HumanizerRegistry.add_equipment_type(equip_type)	
 
-static func get_import_settings_path(mhclo_path)->String:
-	var equip_id = mhclo_path.get_file().get_basename()
+static func get_import_settings_path(equip_id:String)->String:
 	var json_path = "res://data/generated/equipment/" + equip_id + "/import_settings.json"
 	#print(json_path)
 	return json_path
@@ -64,7 +64,7 @@ static func get_equipment_resource_path(mhclo_path)->String:
 	return res_path
 
 static func load_import_settings(mhclo_path:String):
-	var json_path = get_import_settings_path(mhclo_path)
+	var json_path = get_import_settings_path(mhclo_path.get_file().get_basename())
 	var settings := {}
 	if FileAccess.file_exists(json_path):
 		#print("loading json") 
@@ -118,13 +118,18 @@ static func import_all():
 	print("Importing all Equipment")
 	#first, look for mhclos without settings.json , want to copy those settings before deleting the resource
 	scan_for_missing_import_settings("res://data/input/equipment")
-	
+		
 	#now that all import_settings.json and folder has been created..
-	for equip_id in DirAccess.get_directories_at("res://data/generated/equipment"):
-		HumanizerMaterialImportService.import_materials(equip_id)
-		import("res://data/generated/equipment/"+equip_id+"/import_settings.json")
+	for equip_id in get_generated_equipment_ids():
+		import(get_import_settings_path(equip_id),true)
 			
-
+static func get_generated_equipment_ids():
+	var equip = []
+	for filename:String in OSPath.get_files_recursive("res://data/generated/equipment"):
+		if filename.get_file() == "import_settings.json":
+			equip.append(filename.get_base_dir().get_file())
+	return equip
+		
 static func import_folder(path):
 	for folder in OSPath.get_dirs(path):
 		import_folder(folder)
@@ -140,8 +145,8 @@ static func scan_for_missing_import_settings(path,clean=true):
 	for file in OSPath.get_files(path):
 		if file.get_extension() == "mhclo":
 			#need to rewrite json incase slots categories have been updated
-			var settings_path = "res://data/generated/equipment/"
-			settings_path += file.get_file().get_basename() + "/import_settings.json"
+			var equip_id = file.get_file().get_basename()
+			var settings_path = get_import_settings_path(equip_id)
 			var equip_settings = HumanizerEquipmentImportService.load_import_settings(file)
 			HumanizerResourceService.save_resource(settings_path,equip_settings)
 	#now that the import settings are copied, can delete any .res files
