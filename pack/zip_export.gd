@@ -45,20 +45,29 @@ static func generate_zip(pack_name:String):
 			var equip_id = file_path.split("/",false)[4] #res://data/input/material/ Equip_ID
 			#print(file_path)
 			var export_folder = "humanizer/material/".path_join(equip_id)
-			var textures = ["albedo","normal","ao"]	
-			for t in textures:
-				var t_id = t + "_texture_path"
-				var t_path = file_res.get(t_id)
-				if t_path not in [null,""]:
-					#see if theres an image in the folder with the same name, otherwise assume its already in the project somewhere else
-					var local_texture_path = input_folder.path_join(t_path.get_file())
-					if FileAccess.file_exists(local_texture_path):
-						var new_texture_path = export_folder.path_join( t_path.get_file())
-						zip_writer_copy_file(writer,local_texture_path,new_texture_path)
+			store_textures_from_overlay(writer,file_res,file_path.get_base_dir(),export_folder)
+			zip_writer_copy_file(writer,file_path,export_folder.path_join( file_path.get_file()))
+		elif file_res is HumanizerMaterial:
+			var equip_id = file_path.split("/",false)[4] #res://data/input/material/ Equip_ID
+			var export_folder = "humanizer/material/".path_join(equip_id)
+			for overlay in file_res.overlays:
+				store_textures_from_overlay(writer,overlay,file_path.get_base_dir(),export_folder)
 			zip_writer_copy_file(writer,file_path,export_folder.path_join( file_path.get_file()))
 	writer.close()
 	print("pack saved to " + zip_path)
 	#return OK
+
+static func store_textures_from_overlay(writer:ZIPPacker ,overlay:HumanizerOverlay,input_folder:String,export_folder:String):
+	var textures = ["albedo","normal","ao"]	
+	for t in textures:
+		var t_id = t + "_texture_path"
+		var t_path = overlay.get(t_id)
+		if t_path not in [null,""]:
+			#see if theres an image in the folder with the same name, otherwise assume its imported in a different pack
+			var local_texture_path = input_folder.path_join(t_path.get_file())
+			if FileAccess.file_exists(local_texture_path):
+				var new_texture_path = export_folder.path_join( t_path.get_file())
+				zip_writer_copy_file(writer,local_texture_path,new_texture_path)
 	
 static func zip_writer_save_json(writer:ZIPPacker,data,new_path:String):
 	writer.start_file(new_path)
