@@ -2,6 +2,15 @@
 extends Resource
 class_name HumanizerZipService
 
+static var MAT3D_TEXTURES = get_material3d_texture_properties()
+
+static func get_material3d_texture_properties():
+	var t_props = []
+	var blank_mat = StandardMaterial3D.new()
+	for prop in blank_mat.get_property_list():
+		if prop.class_name == "Texture2D":
+			t_props.append(prop.name)
+	return t_props
 
 static func generate_zip(pack_name:String):
 	var json_path = "res://data/pack".path_join(pack_name + ".json")
@@ -29,20 +38,18 @@ static func generate_zip(pack_name:String):
 			var mat_id = file_path.get_file().get_basename()
 			var export_folder = "humanizer/material/".path_join(equip_id)
 			var mat_res = load("res://data/generated/material".path_join(equip_id).path_join(mat_id + ".res"))
-			var material_data := {}
-			var blank_mat = StandardMaterial3D.new()
-			for prop in mat_res.get_property_list():
-				var prop_value = mat_res.get(prop.name)
-				if prop_value != blank_mat.get(prop.name) and prop.name != "resource_path":
-					if prop_value is CompressedTexture2D:
-						var t_id = prop.name.replace("_texture","")
-						var new_texture_path = export_folder.path_join(prop_value.resource_path.get_file())
-						zip_writer_copy_file(writer,prop_value.resource_path,new_texture_path)
-						material_data[prop.name] = "res://" + new_texture_path
-						
-					else:
-						material_data[prop.name] = prop_value
-			zip_writer_save_json(writer,material_data,export_folder.path_join(mat_id + ".json"))
+			
+			for texture_prop in MAT3D_TEXTURES:
+				var texture = mat_res.get(texture_prop)
+				if texture == null:
+					continue
+				var new_texture_path = export_folder.path_join(texture.resource_path.get_file())
+				zip_writer_copy_file(writer,texture.resource_path,new_texture_path)
+				texture.take_over_path("res://" + new_texture_path)
+
+			HumanizerResourceService.save_resource("res://data/temp/material.res",mat_res)
+			#zip_writer_save_json(writer,material_data,export_folder.path_join(mat_id + ".json"))
+			zip_writer_copy_file(writer,"res://data/temp/material.res",export_folder.path_join( file_path.get_file()))
 		elif file_res is HumanizerOverlay:
 			var equip_id = file_path.split("/",false)[4] #res://data/input/material/ Equip_ID
 			#print(file_path)
