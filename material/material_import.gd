@@ -21,7 +21,7 @@ static func import_materials(equip_id:String):
 static func search_for_materials(mhclo_path:String):
 	var materials = {}
 	var overlays = {}
-	var equip_id = mhclo_path.get_file().get_basename().get_basename() #get rid of both .mhclo.res extensions
+	var equip_id = mhclo_path.get_file().get_basename() #get rid of both .mhclo.res extensions
 	var sub_mats = get_manual_materials(equip_id)
 	materials.merge(sub_mats.materials)
 	overlays.merge(sub_mats.overlays)
@@ -34,6 +34,8 @@ static func get_manual_materials(equip_id:String): #custom defined materials
 	var overlays = {}
 	
 	var materials_path = "res://data/input/material/" + equip_id
+	if not DirAccess.dir_exists_absolute(materials_path):
+		return {materials=materials,overlays=overlays}
 	for mat_file in OSPath.get_files_recursive(materials_path):
 		if mat_file.get_extension() == "res":
 			var mat_res = HumanizerResourceService.load_resource(mat_file)
@@ -69,7 +71,7 @@ static func default_material_from_mhclo(mhclo:MHCLO):
 	if default_material == "":
 		var mat_list = search_for_materials(mhclo.mhclo_path)
 		if mat_list.size() > 0:
-			default_material = mat_list.keys()[0]
+			default_material = mat_list.materials.keys()[0]
 	return default_material
 
 static func mhmat_to_material(path:String)->StandardMaterial3D:

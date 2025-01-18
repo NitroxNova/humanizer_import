@@ -9,6 +9,8 @@ static func generate_zip(pack_name:String):
 	
 	#print("generating zip file")
 	var writer := ZIPPacker.new()
+	if not DirAccess.dir_exists_absolute("res://export"):
+		DirAccess.make_dir_absolute("res://export")
 	var zip_path = "res://export".path_join(pack_name+".zip")
 	var err := writer.open(zip_path)
 	if err != OK:

@@ -33,10 +33,13 @@ func fill_contents_tree(selected:Array):
 		equip.set_metadata(0,meta)
 		if meta in selected:
 			equip.set_checked(0,true)
+		var files = []
 		var mat_path = "res://data/generated/material/" + equip_id
-		
-		var files = OSPath.get_files_recursive(mat_path)
-		files.append_array(OSPath.get_files_recursive("res://data/input/material/" + equip_id))
+		if DirAccess.dir_exists_absolute(mat_path):
+			files.append_array(OSPath.get_files_recursive(mat_path))
+		mat_path = "res://data/input/material/" + equip_id
+		if DirAccess.dir_exists_absolute(mat_path):
+			files.append_array(OSPath.get_files_recursive(mat_path))
 		for mat_file in files:
 			if mat_file.get_extension() == "res":
 				var mat_id = mat_file.get_file().get_basename()
