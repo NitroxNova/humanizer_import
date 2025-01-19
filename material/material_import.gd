@@ -12,7 +12,7 @@ static func import_materials(equip_id:String):
 	#var equip_path = "res://data/g/equipment".path_join(equip_id)
 	for file_name in OSPath.get_files_recursive(mhclo_path.get_base_dir()):
 		if file_name.get_extension() == "mhmat":
-			var new_mat = mhmat_to_material(file_name)
+			var new_mat = mhmat_to_material(file_name,equip_id)
 			var mat_id = file_name.get_file().get_basename()
 			var mat_path = "res://data/generated/material/" + equip_id
 			mat_path = mat_path.path_join(mat_id + ".res")
@@ -38,7 +38,7 @@ static func get_manual_materials(equip_id:String): #custom defined materials
 		return {materials=materials,overlays=overlays}
 	for mat_file in OSPath.get_files_recursive(materials_path):
 		if mat_file.get_extension() == "res":
-			var mat_res = HumanizerResourceService.load_resource(mat_file)
+			var mat_res = load(mat_file)
 			if mat_res is HumanizerMaterial or mat_res is StandardMaterial3D:
 				materials[mat_file.get_file().get_basename().get_basename()] = mat_file
 			elif mat_res is HumanizerOverlay:
@@ -74,7 +74,24 @@ static func default_material_from_mhclo(mhclo:MHCLO):
 			default_material = mat_list.materials.keys()[0]
 	return default_material
 
-static func mhmat_to_material(path:String)->StandardMaterial3D:
+static func make_portable_material(folder:String,file_name:String,equip_id:String,texture_prop:String,material:StandardMaterial3D):
+	var image_path = folder.path_join(file_name)
+	var image : Image = Image.load_from_file(image_path)
+	var is_normal = (texture_prop=="normal_texture")
+	image.generate_mipmaps(is_normal)
+	var texture = PortableCompressedTexture2D.new()
+	texture.create_from_image(image,PortableCompressedTexture2D.COMPRESSION_MODE_LOSSLESS) 
+	var texture_path = "res://data/generated/material/"+equip_id
+	if not DirAccess.dir_exists_absolute(texture_path):
+		DirAccess.make_dir_recursive_absolute(texture_path)
+	texture_path = texture_path.path_join(image_path.get_file().get_basename() + ".res")
+	texture.take_over_path(texture_path)
+	ResourceSaver.save(texture,texture_path)
+	material[texture_prop] = texture
+	#material[texture_prop].take_over_path(texture_path.replace("data/generated","humanizer"))
+	#return texture
+	
+static func mhmat_to_material(path:String,equip_id:String)->StandardMaterial3D:
 	var material = StandardMaterial3D.new()
 	var file = FileAccess.open(path,FileAccess.READ)
 	while file.get_position() < file.get_length():
@@ -93,35 +110,37 @@ static func mhmat_to_material(path:String)->StandardMaterial3D:
 		elif line.begins_with("backfaceCull "):
 			if line.split(" ")[1] == "False":
 				material.cull_mode = BaseMaterial3D.CULL_DISABLED
+		
 		elif line.begins_with("diffuseTexture "):
-			var diffuse_path = line.split(" ")[1].strip_edges()
-			diffuse_path = path.get_base_dir().path_join(diffuse_path)
-			material.albedo_texture = HumanizerResourceService.load_resource(diffuse_path)
+			var diffuse_file = line.split(" ")[1].strip_edges()
+			make_portable_material(path.get_base_dir(),diffuse_file,equip_id,"albedo_texture",material)
+		
 		elif line.begins_with("normalmapTexture "):
 			var normal_path = line.split(" ")[1].strip_edges()
-			normal_path = path.get_base_dir().path_join(normal_path)
-			material.normal_texture = HumanizerResourceService.load_resource(normal_path)
+			make_portable_material(path.get_base_dir(),normal_path,equip_id,"normal_texture",material)
 			material.normal_enabled = true
+			
 		elif line.begins_with("bumpTexture "):
 			var bump_path = line.split(" ")[1].strip_edges()
 			bump_path = path.get_base_dir().path_join(bump_path)
-			var normal_texture : Image = HumanizerResourceService.load_resource(bump_path).get_image().duplicate()
+			var normal_texture : Image = load(bump_path).get_image().duplicate()
 			normal_texture.bump_map_to_normal_map()
 			bump_path = bump_path.replace('.png', '_normal.png')
-			normal_texture.save_png( bump_path)
-			material.normal_texture = HumanizerResourceService.load_resource(bump_path)
+			#normal_texture.save_png( bump_path)
+			material.normal_texture = normal_texture
 			material.normal_enabled = true
+		
 		elif line.begins_with("aomapTexture "):
 			var ao_path = line.split(" ")[1].strip_edges()
-			ao_path = path.get_base_dir().path_join(ao_path)
-			material.ao_texture = HumanizerResourceService.load_resource(ao_path)
+			make_portable_material(path.get_base_dir(),ao_path,equip_id,"ao_texture",material)
 			material.ao_enabled = true
+			
 		elif line.begins_with("specularTexture "):
 			var spec_path = line.split(" ")[1].strip_edges()
-			spec_path = path.get_base_dir().path_join(spec_path)
+			make_portable_material(path.get_base_dir(),spec_path,equip_id,"metallic_texture",material)
 			material.metallic = 1
-			material.metallic_texture = HumanizerResourceService.load_resource(spec_path)
 			printerr("specular texture not supported by Godot, using as metallic texture instead. You can manually create materials by adding them to the assets/materials/%asset_name% folder")
+		
 		elif line.begins_with("normalmapIntensity "):
 			material.normal_scale = line.split_floats(" ",false,)[1]
 		elif line.begins_with("aomapIntensity "):

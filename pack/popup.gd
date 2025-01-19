@@ -42,15 +42,18 @@ func fill_contents_tree(selected:Array):
 			files.append_array(OSPath.get_files_recursive(mat_path))
 		for mat_file in files:
 			if mat_file.get_extension() == "res":
-				var mat_id = mat_file.get_file().get_basename()
-				var mat:TreeItem = tree.create_item(equip)
-				mat.set_cell_mode(0,TreeItem.CELL_MODE_CHECK)
-				mat.set_editable(0,true)
-				mat.set_text(0,mat_id)
-				var mat_meta = mat_file
-				mat.set_metadata(0,mat_meta)
-				if mat_meta in selected:
-					mat.set_checked(0,true)
+				var resource = load(mat_file)
+				#exclude compressed image resources
+				if resource is StandardMaterial3D or resource is HumanizerMaterial or resource is HumanizerOverlay:
+					var mat_id = mat_file.get_file().get_basename()
+					var mat:TreeItem = tree.create_item(equip)
+					mat.set_cell_mode(0,TreeItem.CELL_MODE_CHECK)
+					mat.set_editable(0,true)
+					mat.set_text(0,mat_id)
+					var mat_meta = mat_file
+					mat.set_metadata(0,mat_meta)
+					if mat_meta in selected:
+						mat.set_checked(0,true)
 			
 	var anim_tree = tree.create_item(root)
 	anim_tree.set_text(0,"Animations")

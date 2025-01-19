@@ -43,12 +43,13 @@ static func generate_zip(pack_name:String):
 				var texture = mat_res.get(texture_prop)
 				if texture == null:
 					continue
-				var new_texture_path = export_folder.path_join(texture.resource_path.get_file())
-				zip_writer_copy_file(writer,texture.resource_path,new_texture_path)
-				texture.take_over_path("res://" + new_texture_path)
-
-			HumanizerResourceService.save_resource("res://data/temp/material.res",mat_res)
-			#zip_writer_save_json(writer,material_data,export_folder.path_join(mat_id + ".json"))
+				var export_path = texture.resource_path.replace("res://data/generated","humanizer")
+				zip_writer_copy_file(writer,texture.resource_path,export_path)
+				mat_res[texture_prop].take_over_path(texture.resource_path.replace("data/generated","humanizer"))
+				
+			var temp_path = "res://data/temp/material.res"
+			
+			HumanizerResourceService.save_resource(temp_path,mat_res)
 			zip_writer_copy_file(writer,"res://data/temp/material.res",export_folder.path_join( file_path.get_file()))
 		elif file_res is HumanizerOverlay:
 			var equip_id = file_path.split("/",false)[4] #res://data/input/material/ Equip_ID
