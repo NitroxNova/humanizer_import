@@ -41,20 +41,26 @@ layout_mode = 2
 layout_mode = 2
 text = "Default Material "
 
-[node name="DefaultMaterial" type="OptionButton" parent="ImportOptions/HBoxContainer2"]
+[node name="DefaultMaterial" type="TextEdit" parent="ImportOptions/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Material ID"
+scroll_fit_content_height = true
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="ImportOptions"]
 layout_mode = 2
 
 [node name="Label" type="Label" parent="ImportOptions/HBoxContainer3"]
 layout_mode = 2
-text = "Material Override "
+text = "Shared Materials"
 
-[node name="MaterialOverride" type="OptionButton" parent="ImportOptions/HBoxContainer3"]
+[node name="MaterialOverride" type="TextEdit" parent="ImportOptions/HBoxContainer3"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Equipment ID"
+scroll_fit_content_height = true
 
 [node name="SlotsContainer" type="VBoxContainer" parent="ImportOptions"]
 unique_name_in_owner = true
