@@ -78,13 +78,20 @@ static func make_portable_material(folder:String,file_name:String,equip_id:Strin
 	var image_path = folder.path_join(file_name)
 	var image : Image = Image.load_from_file(image_path)
 	var is_normal = (texture_prop=="normal_texture")
+	if texture_prop == "bump_texture":
+		image.bump_map_to_normal_map()
+		is_normal = true
 	image.generate_mipmaps(is_normal)
 	var texture = PortableCompressedTexture2D.new()
 	texture.create_from_image(image,PortableCompressedTexture2D.COMPRESSION_MODE_LOSSLESS) 
 	var texture_path = "res://data/generated/material/"+equip_id
 	if not DirAccess.dir_exists_absolute(texture_path):
 		DirAccess.make_dir_recursive_absolute(texture_path)
-	texture_path = texture_path.path_join(image_path.get_file().get_basename() + ".res")
+	texture_path = texture_path.path_join(image_path.get_file().get_basename())
+	if texture_prop == "bump_texture":
+		texture_path += "_normal.image.res"
+	else:
+		texture_path += ".image.res"
 	texture.take_over_path(texture_path)
 	ResourceSaver.save(texture,texture_path)
 	material[texture_prop] = texture
@@ -122,12 +129,7 @@ static func mhmat_to_material(path:String,equip_id:String)->StandardMaterial3D:
 			
 		elif line.begins_with("bumpTexture "):
 			var bump_path = line.split(" ")[1].strip_edges()
-			bump_path = path.get_base_dir().path_join(bump_path)
-			var normal_texture : Image = load(bump_path).get_image().duplicate()
-			normal_texture.bump_map_to_normal_map()
-			bump_path = bump_path.replace('.png', '_normal.png')
-			#normal_texture.save_png( bump_path)
-			material.normal_texture = normal_texture
+			make_portable_material(path.get_base_dir(),bump_path,equip_id,"bump_texture",material)
 			material.normal_enabled = true
 		
 		elif line.begins_with("aomapTexture "):
