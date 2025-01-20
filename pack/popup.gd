@@ -5,7 +5,7 @@ extends Window
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	fill_pack_names()
-	fill_contents_tree([])
+	init_contents_tree()
 
 func fill_pack_names():
 	%SelectPack.clear()
@@ -15,8 +15,8 @@ func fill_pack_names():
 	for pack_file in DirAccess.get_files_at(pack_path):
 		%SelectPack.add_item(pack_file.get_basename())
 		%SelectPack.set_item_metadata(%SelectPack.item_count-1,pack_path.path_join(pack_file))
-	
-func fill_contents_tree(selected:Array):
+
+func init_contents_tree():
 	var tree = %Contents_Tree
 	tree.clear()
 	tree.columns = 1
@@ -31,8 +31,6 @@ func fill_contents_tree(selected:Array):
 		equip.set_text(0,equip_id)
 		var meta = "res://data/generated/equipment/" + equip_id + "/" + equip_id + ".res" 
 		equip.set_metadata(0,meta)
-		if meta in selected:
-			equip.set_checked(0,true)
 		var files = []
 		var mat_path = "res://data/generated/material/" + equip_id
 		if DirAccess.dir_exists_absolute(mat_path):
@@ -52,12 +50,20 @@ func fill_contents_tree(selected:Array):
 					mat.set_text(0,mat_id)
 					var mat_meta = mat_file
 					mat.set_metadata(0,mat_meta)
-					if mat_meta in selected:
-						mat.set_checked(0,true)
-			
 	var anim_tree = tree.create_item(root)
 	anim_tree.set_text(0,"Animations")
-
+	
+func fill_contents_tree(selected:Array):
+	var tree:Tree = %Contents_Tree
+	var curr_item : TreeItem =  %Contents_Tree.get_root()
+	while curr_item.get_next_in_tree() != null:
+		curr_item = curr_item.get_next_in_tree()
+		var meta = curr_item.get_metadata(0)
+		if meta in selected:
+			curr_item.set_checked(0,true)
+		else:
+			curr_item.set_checked(0,false)
+			
 func _on_close_requested() -> void:
 	get_parent().remove_child(self)
 	queue_free()

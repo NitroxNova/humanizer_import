@@ -17,7 +17,29 @@ static func import_materials(equip_id:String):
 			var mat_path = "res://data/generated/material/" + equip_id
 			mat_path = mat_path.path_join(mat_id + ".res")
 			HumanizerResourceService.save_resource(mat_path,new_mat)
-
+	
+	# make portable textures for custom materials, these will override generated images if named the same
+	var folder = "res://data/input/material/" + equip_id
+	for file_name:String in OSPath.get_files_recursive(folder):
+		if file_name.get_extension() == "res":
+			var resource = load(file_name)
+			if resource is HumanizerMaterial:
+				for overlay in resource.overlays:
+					generate_images_for_overlay(file_name.get_base_dir(),overlay)
+			elif resource is HumanizerOverlay:
+				generate_images_for_overlay(file_name.get_base_dir(),resource)		
+					
+static func generate_images_for_overlay(folder:String,overlay:HumanizerOverlay):
+	for t_id in HumanizerMaterial.TEXTURE_LAYERS: #albedo, ao, normal
+		var path :String = overlay.get(t_id + "_texture_path")
+		if path not in [null,""]:
+			var path_split = path.split("/") # equip_id / image_name
+			for ext in ["png","jpg","jpeg"]:
+				var test_path = folder.path_join(path_split[1] + "." + ext)				
+				if FileAccess.file_exists(test_path):
+					var is_normal = (t_id == "normal")
+					generate_portable_texture(test_path,path_split[0],is_normal,false)
+				
 static func search_for_materials(mhclo_path:String):
 	var materials = {}
 	var overlays = {}
@@ -74,29 +96,33 @@ static func default_material_from_mhclo(mhclo:MHCLO):
 			default_material = mat_list.materials.keys()[0]
 	return default_material
 
-static func make_portable_material(folder:String,file_name:String,equip_id:String,texture_prop:String,material:StandardMaterial3D):
-	var image_path = folder.path_join(file_name)
+static func generate_portable_texture(image_path:String,equip_id:String,is_normal:bool,is_bump:bool):
 	var image : Image = Image.load_from_file(image_path)
-	var is_normal = (texture_prop=="normal_texture")
-	if texture_prop == "bump_texture":
+	if is_bump:
 		image.bump_map_to_normal_map()
 		is_normal = true
 	image.generate_mipmaps(is_normal)
 	var texture = PortableCompressedTexture2D.new()
 	texture.create_from_image(image,PortableCompressedTexture2D.COMPRESSION_MODE_LOSSLESS) 
-	var texture_path = "res://data/generated/material/"+equip_id
-	if not DirAccess.dir_exists_absolute(texture_path):
-		DirAccess.make_dir_recursive_absolute(texture_path)
-	texture_path = texture_path.path_join(image_path.get_file().get_basename())
-	if texture_prop == "bump_texture":
-		texture_path += "_normal.image.res"
+	var save_path = "res://data/generated/material/"+equip_id
+	if not DirAccess.dir_exists_absolute(save_path):
+		DirAccess.make_dir_recursive_absolute(save_path)
+	save_path = save_path.path_join(image_path.get_file().get_basename())
+	if is_bump:
+		save_path += "_normal.image.res"
 	else:
-		texture_path += ".image.res"
-	texture.take_over_path(texture_path)
-	ResourceSaver.save(texture,texture_path)
-	material[texture_prop] = texture
-	#material[texture_prop].take_over_path(texture_path.replace("data/generated","humanizer"))
-	#return texture
+		save_path += ".image.res"
+	texture.take_over_path(save_path)
+	ResourceSaver.save(texture,save_path)
+	return texture
+
+static func make_portable_material(folder:String,file_name:String,equip_id:String,texture_prop:String,material:StandardMaterial3D):
+	var image_path = folder.path_join(file_name)
+	var is_normal = (texture_prop=="normal_texture")
+	var is_bump = (texture_prop=="bump_texture")
+	
+	material[texture_prop] = generate_portable_texture(image_path,equip_id,is_normal,is_bump)
+	
 	
 static func mhmat_to_material(path:String,equip_id:String)->StandardMaterial3D:
 	var material = StandardMaterial3D.new()

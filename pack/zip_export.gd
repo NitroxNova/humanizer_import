@@ -55,19 +55,19 @@ static func generate_zip(pack_name:String):
 			var equip_id = file_path.split("/",false)[4] #res://data/input/material/ Equip_ID
 			#print(file_path)
 			var export_folder = "humanizer/material/".path_join(equip_id)
-			store_textures_from_overlay(writer,file_res,file_path.get_base_dir(),export_folder)
+			store_textures_from_overlay(writer,file_res,file_path.get_base_dir(),equip_id)
 			zip_writer_copy_file(writer,file_path,export_folder.path_join( file_path.get_file()))
 		elif file_res is HumanizerMaterial:
 			var equip_id = file_path.split("/",false)[4] #res://data/input/material/ Equip_ID
 			var export_folder = "humanizer/material/".path_join(equip_id)
 			for overlay in file_res.overlays:
-				store_textures_from_overlay(writer,overlay,file_path.get_base_dir(),export_folder)
+				store_textures_from_overlay(writer,overlay,file_path.get_base_dir(),equip_id)
 			zip_writer_copy_file(writer,file_path,export_folder.path_join( file_path.get_file()))
 	writer.close()
 	print("pack saved to " + zip_path)
 	#return OK
 
-static func store_textures_from_overlay(writer:ZIPPacker ,overlay:HumanizerOverlay,input_folder:String,export_folder:String):
+static func store_textures_from_overlay(writer:ZIPPacker ,overlay:HumanizerOverlay,input_folder:String,equip_id:String):
 	var textures = ["albedo","normal","ao"]	
 	for t in textures:
 		var t_id = t + "_texture_path"
@@ -75,9 +75,11 @@ static func store_textures_from_overlay(writer:ZIPPacker ,overlay:HumanizerOverl
 		if t_path not in [null,""]:
 			#see if theres an image in the folder with the same name, otherwise assume its imported in a different pack
 			var local_texture_path = input_folder.path_join(t_path.get_file())
-			if FileAccess.file_exists(local_texture_path):
-				var new_texture_path = export_folder.path_join( t_path.get_file())
-				zip_writer_copy_file(writer,local_texture_path,new_texture_path)
+			for ext in ["png","jpg","jpeg"]:
+				if FileAccess.file_exists(local_texture_path+"."+ext):
+					var ctex_path = "res://data/generated/material/"+ equip_id.path_join(t_path.get_file()+".image.res")
+					var new_texture_path = "humanizer/material/"+ equip_id.path_join(t_path.get_file()+".image.res")
+					zip_writer_copy_file(writer,ctex_path,new_texture_path)
 	
 static func zip_writer_save_json(writer:ZIPPacker,data,new_path:String):
 	writer.start_file(new_path)
