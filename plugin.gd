@@ -19,6 +19,8 @@ func _add_tool_submenu():
 	equipment_menu.set_item_metadata(equipment_menu.item_count-1,run_equipment_importer)
 	equipment_menu.add_item("Import All")
 	equipment_menu.set_item_metadata(equipment_menu.item_count-1,HumanizerEquipmentImportService.import_all)
+	equipment_menu.add_item("Purge Generated")
+	equipment_menu.set_item_metadata(equipment_menu.item_count-1,HumanizerEquipmentImportService.purge_generated)
 	popup_menu.add_child(equipment_menu)
 	popup_menu.add_submenu_item('Equipment', 'equipment')
 	

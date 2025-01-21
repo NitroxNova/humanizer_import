@@ -122,6 +122,18 @@ static func import_all():
 	#now that all import_settings.json and folder has been created..
 	for equip_id in get_generated_equipment_ids():
 		import(get_import_settings_path(equip_id),true)
+
+static func purge_generated():
+	print("Purging Generated Resources - Keep import_settings.json")
+	var files:Array = OSPath.get_files_recursive("res://data/generated/")
+	files.append_array(OSPath.get_files_recursive("res://data/temp/"))
+	for file_path:String in files:
+		if file_path.ends_with("import_settings.json"):
+			pass #dont delete
+		else:
+			DirAccess.remove_absolute(file_path)
+	OSPath.delete_empty_folders("res://data/generated/")
+	OSPath.delete_empty_folders("res://data/temp/")
 			
 static func get_generated_equipment_ids():
 	var equip = []
@@ -139,7 +151,7 @@ static func import_folder(path):
 			import(file,false) #already generated materials			
 	
 
-static func scan_for_missing_import_settings(path,clean=true):
+static func scan_for_missing_import_settings(path):
 	for folder in OSPath.get_dirs(path):
 		scan_for_missing_import_settings(folder)
 	for file in OSPath.get_files(path):
@@ -149,19 +161,6 @@ static func scan_for_missing_import_settings(path,clean=true):
 			var settings_path = get_import_settings_path(equip_id)
 			var equip_settings = HumanizerEquipmentImportService.load_import_settings(file)
 			HumanizerResourceService.save_resource(settings_path,equip_settings)
-	#now that the import settings are copied, can delete any .res files
-	if clean:
-		for file in OSPath.get_files(path):
-			if file.get_extension() in ['res', 'tscn', 'tres']:
-				DirAccess.remove_absolute(file)
-	
-	
-func _clean_recursive(path: String) -> void:
-	for dir in OSPath.get_dirs(path):
-		_clean_recursive(dir)
-	for fl in OSPath.get_files(path):
-		if fl.get_extension() in ['res', 'tscn', 'tres']:
-			DirAccess.remove_absolute(fl)
 	
 static func _calculate_bone_weights(mhclo:MHCLO,import_settings:Dictionary):
 	var rigged_bone_weights
