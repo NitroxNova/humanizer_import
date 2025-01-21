@@ -40,13 +40,15 @@ static func import(json_path:String,import_materials:=true):
 
 	#build rigged equipment
 	if settings.rigged_glb != "":
-		var rigged_resource = equip_type.duplicate()
-		rigged_resource.rigged = true
+		var rigged_resource : HumanizerEquipmentType = equip_type.duplicate()
 		rigged_resource.display_name = equip_type.display_name + " (Rigged)"
 		rigged_resource.resource_name = equip_type.resource_name + "_Rigged"
+		rigged_resource.material_override = equip_type.resource_name
+		_calculate_attached_bone_weights(mhclo,settings,rigged_resource)
 		var rigged_filename = equip_type.resource_path.get_basename() + "_Rigged.res"
 		HumanizerResourceService.save_resource(rigged_filename,rigged_resource)
 		HumanizerRegistry.add_equipment_type(rigged_resource)
+		
 		
 	#save after adding bone/weights to mhclo
 	HumanizerResourceService.save_resource(equip_type.mhclo_path,mhclo)
@@ -163,16 +165,25 @@ static func scan_for_missing_import_settings(path):
 			HumanizerResourceService.save_resource(settings_path,equip_settings)
 	
 static func _calculate_bone_weights(mhclo:MHCLO,import_settings:Dictionary):
-	var rigged_bone_weights
-	if import_settings.rigged_glb != "":
-		rigged_bone_weights = _build_rigged_bone_arrays(mhclo,import_settings.rigged_glb)
 	for rig_name in HumanizerRegistry.rigs:
 		var rig : HumanizerRig = HumanizerRegistry.rigs[rig_name]
 		var skeleton_data = HumanizerRigService.init_skeleton_data(rig,false)
 		HumanizerEquipmentService.interpolate_weights( mhclo,rig,skeleton_data)
-		if import_settings.rigged_glb != "":
-			HumanizerEquipmentService.interpolate_rigged_weights(mhclo,rigged_bone_weights,rig_name)
 			
+
+static func _calculate_attached_bone_weights(mhclo:MHCLO,import_settings:Dictionary,equip_type:HumanizerEquipmentType):
+	var rigged_bone_weights = _build_rigged_bone_arrays(mhclo,import_settings.rigged_glb)
+	equip_type.rig_config = HumanizerEquipmentRigConfig.new()
+	equip_type.rig_config.config = rigged_bone_weights.config
+	equip_type.rig_config.attach_bones = import_settings.attach_bones
+	if import_settings.attach_bones.is_empty():
+		printerr("No attach bones for " + equip_type.display_name)
+		
+	for rig_name in HumanizerRegistry.rigs:
+		var rig_bw = HumanizerEquipmentService.interpolate_rigged_weights(mhclo,rigged_bone_weights,rig_name)
+		equip_type.rig_config.bones[rig_name] = rig_bw.bones
+		equip_type.rig_config.weights[rig_name] = rig_bw.weights
+	
 static func _build_import_mesh(path: String, mhclo: MHCLO) -> ArrayMesh: 
 	# build basis from obj file
 	var obj_path = mhclo.mhclo_path.get_base_dir().path_join(mhclo.obj_file_name)
@@ -303,8 +314,8 @@ static func _build_rigged_bone_arrays(mhclo:MHCLO,glb:String) -> Dictionary:
 		bones_override[mh_id] = glb_arrays[Mesh.ARRAY_BONES].slice(glb_id*bones_per_vtx,(glb_id+1) * bones_per_vtx)
 		weights_override[mh_id] = glb_arrays[Mesh.ARRAY_WEIGHTS].slice(glb_id*bones_per_vtx,(glb_id+1) * bones_per_vtx)
 	
-	mhclo.rigged_config = bone_config
 	var rigged_bone_weights = {}
 	rigged_bone_weights.bones = bones_override
 	rigged_bone_weights.weights = weights_override
+	rigged_bone_weights.config = bone_config
 	return rigged_bone_weights
