@@ -1,11 +1,16 @@
 @tool
 extends EditorPlugin
 
+# Thread for background tasks
+var thread := Thread.new()
+
 func _enter_tree():
 	_add_tool_submenu()
 
 func _exit_tree():
-	remove_tool_menu_item('Humanizer Import')
+	remove_tool_menu_item('Humanizer Import')	
+	if thread.is_started():
+		thread.wait_to_finish()
 	
 func _add_tool_submenu():
 	var popup_menu = PopupMenu.new()
@@ -24,6 +29,10 @@ func _add_tool_submenu():
 	popup_menu.add_child(equipment_menu)
 	popup_menu.add_submenu_item('Equipment', 'equipment')
 	
+	#preprocessing_popup.add_item('Read ShapeKey files', menu_ids.read_shapekeys)
+	#preprocessing_popup.add_item('Set Up Skeleton Configs', menu_ids.rig_config)
+	#
+	
 	popup_menu.add_item("Generate ZIP")
 	popup_menu.set_item_metadata(popup_menu.item_count-1,generate_zip)
 	add_tool_submenu_item('Humanizer Import', popup_menu)
@@ -32,18 +41,43 @@ func _add_tool_submenu():
 	equipment_menu.id_pressed.connect(handle_menu_event.bind(equipment_menu))
 
 func handle_menu_event(id:int,popup_menu:PopupMenu):
+	if thread.is_alive():
+		printerr('Thread busy...  Try again after current task completes')
+		return
+	if thread.is_started():
+		thread.wait_to_finish()
+
 	var callable : Callable = popup_menu.get_item_metadata(id)
-	callable.call()
+	#callable.call()
+	thread.start(callable)
 	
 func run_animation_importer():
 	var popup = load("res://addons/humanizer_import/animation/menu_popup.tscn").instantiate()
-	get_editor_interface().popup_dialog(popup)
+	get_editor_interface().call_deferred("popup_dialog",popup)
 	
 func run_equipment_importer():
 	var popup = load("res://addons/humanizer_import/equipment/menu_popup.tscn").instantiate()
-	get_editor_interface().popup_dialog(popup)
+	get_editor_interface().call_deferred("popup_dialog",popup)
+	#get_editor_interface().popup_dialog(popup)
 
 func generate_zip():
 	var popup = load("res://addons/humanizer_import/pack/popup.tscn").instantiate()
-	get_editor_interface().popup_dialog(popup)
-	
+	get_editor_interface().call_deferred("popup_dialog",popup)
+
+#func _process_raw_data() -> void:
+	#print_debug('Running all preprocessing')
+	#for task in [
+		#
+		#_read_shapekeys,
+		#_rig_config
+	#]:
+		#thread.start(task)
+		#while thread.is_alive():
+			#await get_tree().create_timer(1).timeout
+		#thread.wait_to_finish()
+	#
+#func _read_shapekeys() -> void:
+	#ShapeKeyReader.new().run()
+	#
+#func _rig_config() -> void:
+	#HumanizerSkeletonConfig.new().run()

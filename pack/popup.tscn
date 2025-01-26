@@ -16,10 +16,16 @@ offset_bottom = 40.0
 unique_name_in_owner = true
 layout_mode = 2
 selected = 0
-item_count = 2
+item_count = 5
 popup/item_0/text = " -- New Pack -- "
-popup/item_1/text = "System_DefaultBody"
+popup/item_1/text = "System_BodyParts"
 popup/item_1/id = 1
+popup/item_2/text = "System_Clothes"
+popup/item_2/id = 2
+popup/item_3/text = "System_DefaultBody"
+popup/item_3/id = 3
+popup/item_4/text = "test"
+popup/item_4/id = 4
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
