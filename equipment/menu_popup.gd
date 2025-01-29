@@ -20,22 +20,23 @@ func _on_close_requested() -> void:
 
 func init_options():
 	slot_boxes = {}
-	for slots_cat:HumanizerSlotCategory in HumanizerGlobalConfig.config.equipment_slots:
+	var slot_categories = ProjectSettings.get_setting("addons/humanizer/slots")
+	for category_name in slot_categories:
 		var label = Label.new()
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		label.text = "--- " + slots_cat.category + " ---"
+		label.text = "--- " + category_name + " ---"
 		%SlotsContainer.add_child(label)
 		var container = HFlowContainer.new()
-		for slot in slots_cat.slots:
+		for slot_id in slot_categories[category_name]:
 			var checkbox = CheckBox.new()
-			checkbox.text = slot
+			checkbox.text = slot_categories[category_name][slot_id]
 			container.add_child(checkbox)
-			slot_boxes[slot+slots_cat.suffix] = checkbox
+			slot_boxes[slot_id] = checkbox
 		%SlotsContainer.add_child(container)
 	
 	if not %MHCLO_FileLoader.file_selected.is_connected(fill_options):
 		%MHCLO_FileLoader.file_selected.connect(fill_options)
-	%MHCLO_FileLoader.current_dir = HumanizerGlobalConfig.config.asset_import_paths[-1].path_join("equipment")
+	%MHCLO_FileLoader.current_dir = "res://data/input/equipment"
 	
 	%SkeletonOptions.clear()
 	%SkeletonOptions.add_item(" -- Select Skeleton --")
@@ -101,7 +102,7 @@ func fill_options(mhclo_path:String=""):
 	%DefaultMaterial.text = import_settings.default_material
 	%MaterialOverride.text = import_settings.material_override
 	
-	var folder_override = HumanizerGlobalConfig.config.get_folder_override_slots(mhclo_path)
+	var folder_override = HumanizerImportConfig.get_folder_override_slots(mhclo_path)
 	
 	if folder_override.is_empty():
 		%SlotsDisabledLabel.hide()

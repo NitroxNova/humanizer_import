@@ -90,7 +90,7 @@ static func load_import_settings(mhclo_path:String):
 		settings.rigged_glb = search_for_rigged_glb(mhclo_path)
 				
 	#override the slots from the folder - so if config changes they all update
-	var slots_ovr = HumanizerGlobalConfig.config.get_folder_override_slots(mhclo_path)
+	var slots_ovr = HumanizerImportConfig.get_folder_override_slots(mhclo_path)
 	#print(slots_ovr)
 	if not slots_ovr.is_empty():
 		settings.slots = []
