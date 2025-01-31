@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bubrqs1n6fp66"]
 
-[ext_resource type="Script" path="res://addons/humanizer_import/animation/menu_popup.gd" id="1_y6hxh"]
+[ext_resource type="Script" uid="uid://tav7ra3iilxl" path="res://addons/humanizer_import/animation/menu_popup.gd" id="1_y6hxh"]
 
 [node name="Popup" type="Window"]
 title = "Import Animations"
@@ -33,14 +33,16 @@ text = "Input Folder"
 [node name="Input_Folder" type="Label" parent="VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "res://animation_input/example"
+text = "res://data/input/animation/"
 
-[node name="FileDialog" type="FileDialog" parent="VBoxContainer/HBoxContainer"]
+[node name="InputFolderDialog" type="FileDialog" parent="VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
 title = "Open a Directory"
 initial_position = 1
 size = Vector2i(303, 500)
 ok_button_text = "Select Current Folder"
 file_mode = 2
+root_subfolder = "res://data/input/animation/"
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
@@ -53,7 +55,6 @@ text = "Library  Name  - "
 unique_name_in_owner = true
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
-text = "example"
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
@@ -65,7 +66,7 @@ text = "Output Folder  - "
 [node name="Output_Folder" type="Label" parent="VBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "res://humanizer/animation"
+text = "res://data/generated/animation/"
 
 [node name="FileDialog" type="FileDialog" parent="VBoxContainer/HBoxContainer2"]
 auto_translate_mode = 1
@@ -81,7 +82,7 @@ size_flags_horizontal = 4
 text = "    Run    "
 
 [connection signal="close_requested" from="." to="." method="_on_close_requested"]
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/Button" to="VBoxContainer/HBoxContainer/FileDialog" method="show"]
-[connection signal="dir_selected" from="VBoxContainer/HBoxContainer/FileDialog" to="." method="_on_input_dir_selected"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/Button" to="." method="on_select_input_folder_pressed"]
+[connection signal="dir_selected" from="VBoxContainer/HBoxContainer/InputFolderDialog" to="." method="_on_input_dir_selected"]
 [connection signal="dir_selected" from="VBoxContainer/HBoxContainer2/FileDialog" to="VBoxContainer/HBoxContainer2/Output_Folder" method="set_text"]
 [connection signal="pressed" from="VBoxContainer/Run" to="." method="_on_run_pressed"]

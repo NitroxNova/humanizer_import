@@ -2,9 +2,9 @@
 extends Node
 class_name Animation_Importer
 		
-var input_folder = "res://animation_input/"
-var output_name = "animations"
-var output_folder = "res://animation_output/"
+var input_folder = "res://data/input/animation"
+var output_name = "example"
+var output_folder = "res://data/generated/animation"
 var add_root = true
 
 func run():

@@ -28,3 +28,7 @@ func _on_run_pressed() -> void:
 func _on_input_dir_selected(dir: String) -> void:
 	%Input_Folder.text = dir
 	%Library_Name.text = dir.get_file()
+
+
+func on_select_input_folder_pressed() -> void:
+	%InputFolderDialog.show()
