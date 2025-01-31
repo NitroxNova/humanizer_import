@@ -107,7 +107,10 @@ func fill_options(mhclo_path:String=""):
 	if folder_override.is_empty():
 		%SlotsDisabledLabel.hide()
 		for slot in import_settings.slots:
-			slot_boxes[slot].button_pressed = true 
+			if slot in slot_boxes:
+				slot_boxes[slot].button_pressed = true 
+			else:
+				printerr("slot not found - " + slot)
 		for slot in slot_boxes:	
 			slot_boxes[slot].disabled = false
 	else:

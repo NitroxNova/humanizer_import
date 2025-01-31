@@ -22,13 +22,15 @@ static func get_folder_override_slots(mhclo_path:String):
 	#print(mhclo_path)
 	var slots = []
 	var slot_folder_name = mhclo_path.split("/",false)[4] #res://data/input/equipment/ "folder_name" /mhclo_file
+	if not slot_folder_name in ProjectSettings.get_setting("addons/humanizer_import/slot_folder_config"):
+		return slots
+		
 	var folder_config = ProjectSettings.get_setting("addons/humanizer_import/slot_folder_config")[slot_folder_name]
 	
 	if "left_right" in folder_config and folder_config.left_right:
-		#print(mhclo_path.get_file())
 		var has_side = false
 		for side in ["left","right"]:
-			if mhclo_path.get_file().begins_with(side):
+			if mhclo_path.get_file().to_lower().begins_with(side):
 				for slot in folder_config.slots:
 					if slot.to_lower().begins_with(side) and slot not in slots:
 						slots.append(slot)
