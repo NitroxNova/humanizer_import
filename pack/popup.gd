@@ -17,7 +17,7 @@ func fill_pack_names():
 		%SelectPack.set_item_metadata(%SelectPack.item_count-1,pack_path.path_join(pack_file))
 
 func init_contents_tree():
-	var tree = %Contents_Tree
+	var tree:Tree = %Contents_Tree
 	tree.clear()
 	tree.columns = 1
 	var root = tree.create_item()
@@ -48,11 +48,18 @@ func init_contents_tree():
 					mat.set_cell_mode(0,TreeItem.CELL_MODE_CHECK)
 					mat.set_editable(0,true)
 					mat.set_text(0,mat_id)
-					var mat_meta = mat_file
-					mat.set_metadata(0,mat_meta)
+					mat.set_metadata(0,mat_file)
 	var anim_tree = tree.create_item(root)
 	anim_tree.set_text(0,"Animations")
-	
+	for lib_file in OSPath.get_files_recursive("res://data/generated/animation/"):
+		var item_text = lib_file.get_file().trim_suffix(".res")
+		var anim_item:TreeItem = tree.create_item(anim_tree)
+		anim_item.set_cell_mode(0,TreeItem.CELL_MODE_CHECK)
+		anim_item.set_editable(0,true)
+		anim_item.set_text(0,item_text)
+		anim_item.set_metadata(0,lib_file)
+		
+		
 func fill_contents_tree(selected:Array):
 	var tree:Tree = %Contents_Tree
 	var curr_item : TreeItem =  %Contents_Tree.get_root()

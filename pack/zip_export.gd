@@ -63,6 +63,8 @@ static func generate_zip(pack_name:String):
 			for overlay in file_res.overlays:
 				store_textures_from_overlay(writer,overlay,file_path.get_base_dir(),equip_id)
 			zip_writer_copy_file(writer,file_path,export_folder.path_join( file_path.get_file()))
+		else:
+			zip_writer_copy_file(writer,file_path,file_path.replace("res://data/generated","humanizer"))
 	writer.close()
 	print("pack saved to " + zip_path)
 	#return OK
