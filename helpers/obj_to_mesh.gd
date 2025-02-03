@@ -89,7 +89,7 @@ func convert_face_array(face_array):
 	
 func process_obj():
 	var obj_file = FileAccess.open(obj_path,FileAccess.READ)	
-	obj_arrays.vertex = []
+	obj_arrays.vertex = PackedVector3Array()
 	obj_arrays.uv = []
 	obj_arrays.face = []
 	while obj_file.get_position() < obj_file.get_length():

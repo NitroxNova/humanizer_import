@@ -20,17 +20,23 @@ func _add_tool_submenu():
 	
 	
 	var equipment_menu = PopupMenu.new()
-	equipment_menu.name = "equipment"
 	equipment_menu.add_item("Manual Import")
 	equipment_menu.set_item_metadata(equipment_menu.item_count-1,run_equipment_importer)
 	equipment_menu.add_item("Import All")
 	equipment_menu.set_item_metadata(equipment_menu.item_count-1,HumanizerEquipmentImportService.import_all)
 	equipment_menu.add_item("Purge Generated")
 	equipment_menu.set_item_metadata(equipment_menu.item_count-1,HumanizerEquipmentImportService.purge_generated)
-	popup_menu.add_child(equipment_menu)
-	popup_menu.add_submenu_item('Equipment', 'equipment')
+	popup_menu.add_submenu_node_item('Equipment', equipment_menu)
 	
-	#preprocessing_popup.add_item('Read ShapeKey files', menu_ids.read_shapekeys)
+	popup_menu.add_item("Targets")
+	popup_menu.set_item_metadata(popup_menu.item_count-1,run_target_importer)
+	
+	var preprocessing_menu = PopupMenu.new()
+	preprocessing_menu.add_item("Generate Basis")
+	preprocessing_menu.set_item_metadata(preprocessing_menu.item_count-1,HumanizerBaseMeshReader.run)
+	
+	popup_menu.add_submenu_node_item('Preprocessing', preprocessing_menu)
+	
 	#preprocessing_popup.add_item('Set Up Skeleton Configs', menu_ids.rig_config)
 	#
 	
@@ -40,6 +46,7 @@ func _add_tool_submenu():
 
 	popup_menu.id_pressed.connect(handle_menu_event.bind(popup_menu))
 	equipment_menu.id_pressed.connect(handle_menu_event.bind(equipment_menu))
+	preprocessing_menu.id_pressed.connect(handle_menu_event.bind(preprocessing_menu))
 
 func handle_menu_event(id:int,popup_menu:PopupMenu):
 	if thread.is_alive():
@@ -60,6 +67,11 @@ func run_equipment_importer():
 	var popup = load("res://addons/humanizer_import/equipment/menu_popup.tscn").instantiate()
 	get_editor_interface().call_deferred("popup_dialog",popup)
 	#get_editor_interface().popup_dialog(popup)
+	
+func run_target_importer():
+	var popup = load("res://addons/humanizer_import/target/menu_popup.tscn").instantiate()
+	get_editor_interface().call_deferred("popup_dialog",popup)
+
 
 func generate_zip():
 	var popup = load("res://addons/humanizer_import/pack/popup.tscn").instantiate()

@@ -1,0 +1,58 @@
+[gd_scene load_steps=2 format=3 uid="uid://cl63q5umrohri"]
+
+[ext_resource type="Script" uid="uid://blcwintljxqox" path="res://addons/humanizer_import/target/menu_popup.gd" id="1_d0lbm"]
+
+[node name="MenuPopup" type="Window"]
+title = "Import Targets"
+initial_position = 1
+size = Vector2i(350, 100)
+script = ExtResource("1_d0lbm")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Input_Folder_Button" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Input Folder"
+
+[node name="Input_Folder" type="Label" parent="VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "res://data/input/target/"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+text = "Output - "
+
+[node name="Output_File" type="Label" parent="VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Button" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Generate"
+
+[node name="InputFolderDialog" type="FileDialog" parent="VBoxContainer"]
+unique_name_in_owner = true
+auto_translate_mode = 1
+title = "Open a Directory"
+initial_position = 1
+size = Vector2i(303, 500)
+ok_button_text = "Select Current Folder"
+file_mode = 2
+root_subfolder = "res://data/input/animation/"
+
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/Input_Folder_Button" to="." method="_on_input_folder_button_pressed"]
+[connection signal="dir_selected" from="VBoxContainer/InputFolderDialog" to="." method="_on_input_folder_dialog_dir_selected"]

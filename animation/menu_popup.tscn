@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bubrqs1n6fp66"]
 
-[ext_resource type="Script" uid="uid://tav7ra3iilxl" path="res://addons/humanizer_import/animation/menu_popup.gd" id="1_y6hxh"]
+[ext_resource type="Script" uid="uid://bfoab5u31n7iu" path="res://addons/humanizer_import/animation/menu_popup.gd" id="1_y6hxh"]
 
 [node name="Popup" type="Window"]
 title = "Import Animations"

@@ -5,17 +5,10 @@ extends RefCounted
 var target_data : HumanizerTargetData
 
 # Process the shape key data.
-func run():
-	if OSPath.get_contents(HumanizerGlobalConfig.config.asset_import_paths[0].path_join("targets")).dirs.is_empty():
-		printerr("missing core target files, download from https://github.com/makehumancommunity/makehuman/tree/master/makehuman/data/targets")
-		printerr("and copy them to " + HumanizerGlobalConfig.config.asset_import_paths[0].path_join("targets"))
-		return
-	
+func run(input_path:String):
+		
 	print('Collecting shape key data from target files')
-	target_data = HumanizerTargetData.new()
-	HumanizerTargetService.data = target_data #clear reference to file
-	DirAccess.remove_absolute("res://addons/humanizer/data/resources/target_data.res")
-	
+		
 	# Load helper mesh and index vertices
 	var helper_mesh: ArrayMesh = HumanizerResourceService.load_resource('res://addons/humanizer/data/resources/base_helpers.res')
 	var helper_vertices = helper_mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
@@ -28,8 +21,8 @@ func run():
 		target_data.basis.append(coords)
 
 	# Get individual shapekey data
-	for path in HumanizerGlobalConfig.config.asset_import_paths:
-		_get_shape_keys(path + 'targets/')
+	for path in input_path:
+		_get_shape_keys(path)
 	
 	ResourceSaver.save(target_data,"res://addons/humanizer/data/resources/target_data.res")	
 	
