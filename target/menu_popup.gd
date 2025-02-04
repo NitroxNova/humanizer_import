@@ -24,3 +24,12 @@ func _on_input_folder_button_pressed() -> void:
 func _on_input_folder_dialog_dir_selected(dir: String) -> void:
 	%Input_Folder.text = dir
 	%Output_File.text = "res://data/generated/target/" + dir.get_file() + ".res"
+
+
+func _on_generate_button_pressed() -> void:
+	var input_folder = %Input_Folder.text
+	if input_folder == "" or input_folder == "res://data/input/target/":
+		printerr("Input Folder cannot be blank, select a subdirectory inside the target folder.")
+		return
+	HumanizerTargetReader.run(input_folder)
+	close_requested.emit()

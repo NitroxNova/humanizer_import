@@ -58,7 +58,16 @@ func init_contents_tree():
 		anim_item.set_editable(0,true)
 		anim_item.set_text(0,item_text)
 		anim_item.set_metadata(0,lib_file)
-		
+	
+	var target_tree = tree.create_item(root)
+	target_tree.set_text(0,"Targets")
+	for data_file in OSPath.get_files_recursive("res://data/generated/target/"):
+		var item_text = data_file.get_file().trim_suffix(".data")	
+		var target_item:TreeItem = tree.create_item(target_tree)
+		target_item.set_cell_mode(0,TreeItem.CELL_MODE_CHECK)
+		target_item.set_editable(0,true)
+		target_item.set_text(0,item_text)
+		target_item.set_metadata(0,data_file)
 		
 func fill_contents_tree(selected:Array):
 	var tree:Tree = %Contents_Tree

@@ -25,6 +25,9 @@ static func generate_zip(pack_name:String):
 	if err != OK:
 		return err
 	for file_path:String in selected_files:
+		if file_path.get_extension() == "data":
+			zip_writer_copy_file(writer,file_path,file_path.replace("res://data/generated","humanizer"))
+			continue
 		var file_res = load(file_path)
 		var input_folder = file_path.get_base_dir()
 		if file_res is HumanizerEquipmentType:

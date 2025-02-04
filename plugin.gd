@@ -31,11 +31,11 @@ func _add_tool_submenu():
 	popup_menu.add_item("Targets")
 	popup_menu.set_item_metadata(popup_menu.item_count-1,run_target_importer)
 	
-	var preprocessing_menu = PopupMenu.new()
-	preprocessing_menu.add_item("Generate Basis")
-	preprocessing_menu.set_item_metadata(preprocessing_menu.item_count-1,HumanizerBaseMeshReader.run)
+	var internal_menu = PopupMenu.new()
+	internal_menu.add_item("Generate Basis")
+	internal_menu.set_item_metadata(internal_menu.item_count-1,HumanizerBaseMeshReader.run)
 	
-	popup_menu.add_submenu_node_item('Preprocessing', preprocessing_menu)
+	popup_menu.add_submenu_node_item('Internal', internal_menu)
 	
 	#preprocessing_popup.add_item('Set Up Skeleton Configs', menu_ids.rig_config)
 	#
@@ -46,7 +46,7 @@ func _add_tool_submenu():
 
 	popup_menu.id_pressed.connect(handle_menu_event.bind(popup_menu))
 	equipment_menu.id_pressed.connect(handle_menu_event.bind(equipment_menu))
-	preprocessing_menu.id_pressed.connect(handle_menu_event.bind(preprocessing_menu))
+	internal_menu.id_pressed.connect(handle_menu_event.bind(internal_menu))
 
 func handle_menu_event(id:int,popup_menu:PopupMenu):
 	if thread.is_alive():

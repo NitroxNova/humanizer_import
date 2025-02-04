@@ -39,7 +39,7 @@ text = "Output - "
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="Button" type="Button" parent="VBoxContainer"]
+[node name="GenerateButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 text = "Generate"
 
@@ -51,8 +51,9 @@ initial_position = 1
 size = Vector2i(303, 500)
 ok_button_text = "Select Current Folder"
 file_mode = 2
-root_subfolder = "res://data/input/animation/"
+root_subfolder = "res://data/input/target/"
 
 [connection signal="close_requested" from="." to="." method="_on_close_requested"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/Input_Folder_Button" to="." method="_on_input_folder_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/GenerateButton" to="." method="_on_generate_button_pressed"]
 [connection signal="dir_selected" from="VBoxContainer/InputFolderDialog" to="." method="_on_input_folder_dialog_dir_selected"]

@@ -8,6 +8,13 @@ static func run():
 	var basis:PackedVector3Array = PackedVector3Array( obj_to_mesh.obj_arrays.vertex)
 	for idx in basis.size():
 		basis[idx] *= .1
-	var save_file = FileAccess.open("res://data/generated/basis.data",FileAccess.WRITE)
+	var foot_offset = HumanizerBodyService.get_foot_offset(basis)
+	for idx in basis.size():
+		basis[idx].y -= foot_offset
+		
+	var save_file_name = "res://data/generated/basis.data"
+	if not DirAccess.dir_exists_absolute(save_file_name.get_base_dir()):
+		DirAccess.make_dir_absolute(save_file_name.get_base_dir())
+	var save_file = FileAccess.open(save_file_name,FileAccess.WRITE)
 	save_file.store_var(basis)
 	save_file.close()
