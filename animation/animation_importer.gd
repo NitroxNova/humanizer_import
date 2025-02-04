@@ -56,12 +56,5 @@ func create_animation_resource():
 	if not DirAccess.dir_exists_absolute(output_folder):
 		DirAccess.make_dir_recursive_absolute(output_folder)
 	var file_name = output_folder.path_join(output_name+".res")
-	var increment = 2
-	while FileAccess.file_exists(file_name):
-		file_name = output_folder.path_join(output_name + str(increment) + ".res")
-		increment += 1
 	ResourceSaver.save(anim_lib,file_name)
-	
-	#replace .gdignore file - although it should still be there, but just in case
-	#FileAccess.open(input_folder.path_join(".gdignore"), FileAccess.WRITE).store_string("")
 	
