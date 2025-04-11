@@ -6,7 +6,7 @@ func run():
 	# Prepare data structures
 	var vertex_groups = HumanizerResourceService.load_resource("res://addons/humanizer/data/resources/basemesh_vertex_groups.json")
 	
-	for path in HumanizerGlobalConfig.config.asset_import_paths:
+	for path in ProjectSettings.get_setting_with_override("addons/humanizer/asset_import_paths") :
 		for name in HumanizerRegistry.rigs:
 			print('Importing rig ' + name)
 			var rig: HumanizerRig = HumanizerRegistry.rigs[name]
