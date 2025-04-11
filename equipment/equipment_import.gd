@@ -13,11 +13,11 @@ static func generate_tag_from_guess(name: String) -> Array:
 	# Feet
 	var tags = []
 	var tag_lookup = {
-		"HeadClothes" : ["horn", "glasses", "hat", "mouth", "helmet", "antler", "veil", "cap", "beard", "bonnet", "mask", "moustache", "mask"],
-		"TorsoClothes" : ["sweater", "tunic", "sash", "shirt", "robe", "bikini", "belt", "jacket", "suit", "vest", "dress", "bra", "top", "babydoll", "apron", "wings", "armor", "baby_doll", "uniform", "tank"],
-		"LegsClothes" : ["stocking", "skirt", "trouser", "jeans", "pants", "panty", "thong", "shorts", "tail"],
-		"FeetClothes" : ["shoe", "feet", "sock", "boot", "flats", "sneakers"],
-		"HandsClothes" : ["guitar", "sleeve", "bow", "weapon"]
+		"headclothes" : ["horn", "glasses", "hat", "mouth", "helmet", "antler", "veil", "cap", "beard", "bonnet", "mask", "moustache", "mask"],
+		"torsoclothes" : ["sweater", "tunic", "sash", "shirt", "robe", "bikini", "belt", "jacket", "suit", "vest", "dress", "bra", "top", "babydoll", "apron", "wings", "armor", "baby_doll", "uniform", "tank"],
+		"legsclothes" : ["stocking", "skirt", "trouser", "jeans", "pants", "panty", "thong", "shorts", "tail"],
+		"feetclothes" : ["shoe", "feet", "sock", "boot", "flats", "sneakers"],
+		"handsclothes" : ["guitar", "sleeve", "bow", "weapon"]
 	}
 	name = name.to_lower()
 	print("Auto detecting tag from name...")
