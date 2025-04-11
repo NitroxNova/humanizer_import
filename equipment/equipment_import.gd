@@ -32,11 +32,11 @@ static func generate_tag_from_guess(name: String) -> Array:
 
 static func import(json_path:String,import_materials:=true):
 	#load settings
-	var settings = HumanizerResourceService.load_resource(json_path)
+	var settings = OSPath.read_json(json_path)
 	var folder = json_path.get_base_dir()
 	if import_materials:
 		#generate material files
-		HumanizerMaterialService.import_materials(folder)
+		HumanizerMaterialImportService.import_materials(settings.mhclo.get_file().get_basename())
 	#load mhclo
 	var mhclo := MHCLO.new()
 	mhclo.parse_file(settings.mhclo)
@@ -50,7 +50,7 @@ static func import(json_path:String,import_materials:=true):
 	equip_type.resource_name = mhclo.resource_name
 	equip_type.default_material = settings.default_material
 	var save_path = folder.path_join(equip_type.resource_name + '.res')
-	var mats = HumanizerMaterialService.search_for_materials(mhclo.mhclo_path)
+	var mats = HumanizerMaterialImportService.search_for_materials(mhclo.mhclo_path)
 	equip_type.textures = mats.materials
 	equip_type.overlays = mats.overlays
 	equip_type.display_name = settings.display_name
