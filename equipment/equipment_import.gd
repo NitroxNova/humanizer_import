@@ -1,9 +1,37 @@
 extends Resource
 class_name HumanizerEquipmentImportService
 
+static func generate_tag_from_guess(name: String) -> Array:
+	# manual search... assets dont have some of them
+	# Head
+	# Eyes
+	# Mouth
+	# Hands
+	# Arms
+	# Torso
+	# Legs
+	# Feet
+	var tags = []
+	var tag_lookup = {
+		"headclothes" : ["horn", "glasses", "hat", "mouth", "helmet", "antler", "veil", "cap", "beard", "bonnet", "mask", "moustache", "mask"],
+		"torsoclothes" : ["sweater", "tunic", "sash", "shirt", "robe", "bikini", "belt", "jacket", "suit", "vest", "dress", "bra", "top", "babydoll", "apron", "wings", "armor", "baby_doll", "uniform", "tank"],
+		"legsclothes" : ["stocking", "skirt", "trouser", "jeans", "pants", "panty", "thong", "shorts", "tail"],
+		"feetclothes" : ["shoe", "feet", "sock", "boot", "flats", "sneakers"],
+		"handsclothes" : ["guitar", "sleeve", "bow", "weapon"]
+	}
+	name = name.to_lower()
+	print("Auto detecting tag from name...")
+	var found = false
+	for slot in tag_lookup.keys():
+		for item_tag in tag_lookup[slot]:
+			if name.contains(item_tag):
+				print("Auto generated tag: ", slot, " contains ", item_tag)
+				tags.append(slot)
+	return tags
+
+
 static func import(json_path:String,import_materials:=true):
 	#load settings
-	#print(json_path)
 	var settings = OSPath.read_json(json_path)
 	var folder = json_path.get_base_dir()
 	if import_materials:
@@ -12,28 +40,39 @@ static func import(json_path:String,import_materials:=true):
 	#load mhclo
 	var mhclo := MHCLO.new()
 	mhclo.parse_file(settings.mhclo)
-	print('Importing asset ' + mhclo.resource_name)
+	print('Importing asset ' + folder)
 	# Build resource object
 	var equip_type := HumanizerEquipmentType.new()
 	# Mesh operations
 	_build_import_mesh(folder, mhclo)
-		
+
 	equip_type.path = folder
 	equip_type.resource_name = mhclo.resource_name
 	equip_type.default_material = settings.default_material
-	equip_type.material_override = settings.material_override
 	var save_path = folder.path_join(equip_type.resource_name + '.res')
 	var mats = HumanizerMaterialImportService.search_for_materials(mhclo.mhclo_path)
 	equip_type.textures = mats.materials
 	equip_type.overlays = mats.overlays
 	equip_type.display_name = settings.display_name
-	
+
 	equip_type.slots.clear()
 	for slot in settings.slots:
+		print("Added to slot: ", slot)
 		equip_type.slots.append(slot)
+
 	if equip_type.slots.is_empty():
-		printerr("Warning - " + equip_type.resource_name + " has no equipment slots")
-	
+		var tags = generate_tag_from_guess(equip_type.resource_name)
+		equip_type.slots.append_array(tags)
+		print("Auto generated tags: ", tags)
+
+	if equip_type.slots.is_empty():
+		printerr("Warning - " + equip_type.resource_name + " has no equipment slots, you can manually add them to the resource file.")
+
+	if folder.contains("/skins/"):
+		print("Detected Skin - Adding to the DefaultBody! ", folder)
+		var body_path: String = "res://addons/humanizer/data/assets/equipment/body/Default/DefaultBody.res"
+		var default_body: HumanizerEquipmentType = load(body_path)
+		ResourceSaver.save(default_body, body_path)
 	_calculate_bone_weights(mhclo,settings)
 	
 	HumanizerResourceService.save_resource(save_path,equip_type)
