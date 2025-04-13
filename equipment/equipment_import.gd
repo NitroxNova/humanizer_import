@@ -1,35 +1,6 @@
 extends Resource
 class_name HumanizerEquipmentImportService
 
-static func generate_tag_from_guess(name: String) -> Array:
-	# manual search... assets dont have some of them
-	# Head
-	# Eyes
-	# Mouth
-	# Hands
-	# Arms
-	# Torso
-	# Legs
-	# Feet
-	var tags = []
-	var tag_lookup = {
-		"headclothes" : ["horn", "glasses", "hat", "mouth", "helmet", "antler", "veil", "cap", "beard", "bonnet", "mask", "moustache", "mask"],
-		"torsoclothes" : ["sweater", "tunic", "sash", "shirt", "robe", "bikini", "belt", "jacket", "suit", "vest", "dress", "bra", "top", "babydoll", "apron", "wings", "armor", "baby_doll", "uniform", "tank"],
-		"legsclothes" : ["stocking", "skirt", "trouser", "jeans", "pants", "panty", "thong", "shorts", "tail"],
-		"feetclothes" : ["shoe", "feet", "sock", "boot", "flats", "sneakers"],
-		"handsclothes" : ["guitar", "sleeve", "bow", "weapon"]
-	}
-	name = name.to_lower()
-	print("Auto detecting tag from name...")
-	var found = false
-	for slot in tag_lookup.keys():
-		for item_tag in tag_lookup[slot]:
-			if name.contains(item_tag):
-				print("Auto generated tag: ", slot, " contains ", item_tag)
-				tags.append(slot)
-	return tags
-
-
 static func import(json_path:String,import_materials:=true):
 	#load settings
 	var settings = OSPath.read_json(json_path)
@@ -58,13 +29,8 @@ static func import(json_path:String,import_materials:=true):
 
 	equip_type.slots.clear()
 	for slot in settings.slots:
-		print("Added to slot: ", slot)
 		equip_type.slots.append(slot)
-
-	if equip_type.slots.is_empty():
-		var tags = generate_tag_from_guess(equip_type.resource_name)
-		equip_type.slots.append_array(tags)
-		print("Auto generated tags: ", tags)
+	print("Added to slot: ", equip_type.slots)
 
 	if equip_type.slots.is_empty():
 		printerr("Warning - " + equip_type.resource_name + " has no equipment slots, you can manually add them to the resource file.")
@@ -135,6 +101,11 @@ static func load_import_settings(mhclo_path:String):
 	if not slots_ovr.is_empty():
 		settings.slots = []
 		settings.slots.append_array(slots_ovr)
+	
+	if settings.slots.is_empty():
+		var tags = generate_tag_from_guess(mhclo_path.get_file().get_basename())
+		settings.slots = tags
+		print("Auto generated slots: ", tags)
 	
 	return settings
 
@@ -359,3 +330,24 @@ static func _build_rigged_bone_arrays(mhclo:MHCLO,glb:String) -> Dictionary:
 	rigged_bone_weights.weights = weights_override
 	rigged_bone_weights.config = bone_config
 	return rigged_bone_weights
+
+static func generate_tag_from_guess(name: String) -> Array:
+	# fallback if user doesnt use predefined slot config folders
+	# manual search... assets dont have some of them
+	var tags = []
+	var tag_lookup = {
+		"headclothes" : ["horn", "glasses", "hat", "mouth", "helmet", "antler", "veil", "cap", "beard", "bonnet", "mask", "moustache", "mask"],
+		"torsoclothes" : ["sweater", "tunic", "sash", "shirt", "robe", "bikini", "belt", "jacket", "suit", "vest", "dress", "bra", "top", "babydoll", "apron", "wings", "armor", "baby_doll", "uniform", "tank"],
+		"legsclothes" : ["stocking", "skirt", "trouser", "jeans", "pants", "panty", "thong", "shorts", "tail"],
+		"feetclothes" : ["shoe", "feet", "sock", "boot", "flats", "sneakers"],
+		"handsclothes" : ["guitar", "sleeve", "bow", "weapon"]
+	}
+	name = name.to_lower()
+	#print("Auto detecting tag from name...")
+	var found = false
+	for slot in tag_lookup.keys():
+		for item_tag in tag_lookup[slot]:
+			if name.contains(item_tag):
+				#print("Auto generated tag: ", slot, " contains ", item_tag)
+				tags.append(slot)
+	return tags
