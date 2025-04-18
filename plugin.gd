@@ -5,6 +5,19 @@ extends EditorPlugin
 var thread := Thread.new()
 
 func _enter_tree():
+	
+	var path = "res://data/input"
+	if not DirAccess.dir_exists_absolute(path):
+		DirAccess.make_dir_absolute(path)
+	if not DirAccess.dir_exists_absolute(path+"/target"):
+		DirAccess.make_dir_absolute(path+"/target")
+	if not DirAccess.dir_exists_absolute(path+"/material"):
+		DirAccess.make_dir_absolute(path+"/material")
+	if not DirAccess.dir_exists_absolute(path+"/equipment"):
+		DirAccess.make_dir_absolute(path+"/equipment")
+	if not DirAccess.dir_exists_absolute(path+"/animation"):
+		DirAccess.make_dir_absolute(path+"/animation")
+	
 	_add_tool_submenu()
 	HumanizerImportConfig.init_settings()
 

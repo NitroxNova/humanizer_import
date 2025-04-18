@@ -26,7 +26,7 @@ static func generate_zip(pack_name:String):
 		return err
 	for file_path:String in selected_files:
 		if file_path.get_extension() == "data":
-			zip_writer_copy_file(writer,file_path,file_path.replace("res://data/generated","humanizer"))
+			zip_writer_copy_file(writer,file_path,file_path.replace("res://humanizer","humanizer"))
 			continue
 		var file_res = load(file_path)
 		var input_folder = file_path.get_base_dir()
@@ -40,15 +40,15 @@ static func generate_zip(pack_name:String):
 			var equip_id = file_path.get_base_dir().get_file()
 			var mat_id = file_path.get_file().get_basename()
 			var export_folder = "humanizer/material/".path_join(equip_id)
-			var mat_res = load("res://data/generated/material".path_join(equip_id).path_join(mat_id + ".res"))
+			var mat_res = load("res://humanizer/material".path_join(equip_id).path_join(mat_id + ".res"))
 			
 			for texture_prop in MAT3D_TEXTURES:
 				var texture = mat_res.get(texture_prop)
 				if texture == null:
 					continue
-				var export_path = texture.resource_path.replace("res://data/generated","humanizer")
+				var export_path = texture.resource_path.replace("res://humanizer","humanizer")
 				zip_writer_copy_file(writer,texture.resource_path,export_path)
-				mat_res[texture_prop].take_over_path(texture.resource_path.replace("data/generated","humanizer"))
+				#mat_res[texture_prop].take_over_path(texture.resource_path.replace("humanizer","humanizer"))
 				
 			var temp_path = "res://data/temp/material.res"
 			
@@ -67,7 +67,7 @@ static func generate_zip(pack_name:String):
 				store_textures_from_overlay(writer,overlay,file_path.get_base_dir(),equip_id)
 			zip_writer_copy_file(writer,file_path,export_folder.path_join( file_path.get_file()))
 		else:
-			zip_writer_copy_file(writer,file_path,file_path.replace("res://data/generated","humanizer"))
+			zip_writer_copy_file(writer,file_path,file_path.replace("res://humanizer","humanizer"))
 	writer.close()
 	print("pack saved to " + zip_path)
 	#return OK
@@ -82,7 +82,7 @@ static func store_textures_from_overlay(writer:ZIPPacker ,overlay:HumanizerOverl
 			var local_texture_path = input_folder.path_join(t_path.get_file())
 			for ext in ["png","jpg","jpeg"]:
 				if FileAccess.file_exists(local_texture_path+"."+ext):
-					var ctex_path = "res://data/generated/material/"+ equip_id.path_join(t_path.get_file()+".image.res")
+					var ctex_path = "res://humanizer/material/"+ equip_id.path_join(t_path.get_file()+".image.res")
 					var new_texture_path = "humanizer/material/"+ equip_id.path_join(t_path.get_file()+".image.res")
 					zip_writer_copy_file(writer,ctex_path,new_texture_path)
 	

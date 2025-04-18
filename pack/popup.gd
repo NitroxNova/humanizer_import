@@ -29,10 +29,10 @@ func init_contents_tree():
 		equip.set_cell_mode(0,TreeItem.CELL_MODE_CHECK)
 		equip.set_editable(0,true)
 		equip.set_text(0,equip_id)
-		var meta = "res://data/generated/equipment/" + equip_id + "/" + equip_id + ".res" 
+		var meta = "res://humanizer/equipment/" + equip_id + "/" + equip_id + ".res" 
 		equip.set_metadata(0,meta)
 		var files = []
-		var mat_path = "res://data/generated/material/" + equip_id
+		var mat_path = "res://humanizer/material/" + equip_id
 		if DirAccess.dir_exists_absolute(mat_path):
 			files.append_array(OSPath.get_files_recursive(mat_path))
 		mat_path = "res://data/input/material/" + equip_id
@@ -51,7 +51,7 @@ func init_contents_tree():
 					mat.set_metadata(0,mat_file)
 	var anim_tree = tree.create_item(root)
 	anim_tree.set_text(0,"Animations")
-	for lib_file in OSPath.get_files_recursive("res://data/generated/animation/"):
+	for lib_file in OSPath.get_files_recursive("res://humanizer/animation/"):
 		var item_text = lib_file.get_file().trim_suffix(".res")
 		var anim_item:TreeItem = tree.create_item(anim_tree)
 		anim_item.set_cell_mode(0,TreeItem.CELL_MODE_CHECK)
@@ -61,7 +61,7 @@ func init_contents_tree():
 	
 	var target_tree = tree.create_item(root)
 	target_tree.set_text(0,"Targets")
-	for data_file in OSPath.get_files_recursive("res://data/generated/target/"):
+	for data_file in OSPath.get_files_recursive("res://humanizer/target/"):
 		var item_text = data_file.get_file().trim_suffix(".data")	
 		var target_item:TreeItem = tree.create_item(target_tree)
 		target_item.set_cell_mode(0,TreeItem.CELL_MODE_CHECK)

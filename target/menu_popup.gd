@@ -23,7 +23,7 @@ func _on_input_folder_button_pressed() -> void:
 
 func _on_input_folder_dialog_dir_selected(dir: String) -> void:
 	%Input_Folder.text = dir
-	%Output_File.text = "res://data/generated/target/" + dir.get_file() + ".res"
+	%Output_File.text = "res://humanizer/target/" + dir.get_file() + ".res"
 
 
 func _on_generate_button_pressed() -> void:

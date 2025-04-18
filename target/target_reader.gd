@@ -19,7 +19,7 @@ static func run(input_folder:String):	#need to put this in a thread
 			data[target_name] = target_array
 			print("Added Target " + target_name)
 			
-	var save_file_name = "res://data/generated/target/" + input_folder.get_file() + ".data"
+	var save_file_name = "res://humanizer/target/" + input_folder.get_file() + ".data"
 	if not DirAccess.dir_exists_absolute(save_file_name.get_base_dir()):
 		DirAccess.make_dir_absolute(save_file_name.get_base_dir())
 	var save_file = FileAccess.open(save_file_name,FileAccess.WRITE)
