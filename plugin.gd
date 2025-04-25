@@ -17,6 +17,11 @@ func _enter_tree():
 		DirAccess.make_dir_absolute(path+"/equipment")
 	if not DirAccess.dir_exists_absolute(path+"/animation"):
 		DirAccess.make_dir_absolute(path+"/animation")
+
+	#make defined slot folders
+	for foldername in ProjectSettings.get_setting_with_override("addons/humanizer_import/slot_folder_config"):
+		if not DirAccess.dir_exists_absolute(path+"/equipment/"+foldername):
+			DirAccess.make_dir_absolute(path+"/equipment/"+foldername)	
 	
 	_add_tool_submenu()
 	HumanizerImportConfig.init_settings()
