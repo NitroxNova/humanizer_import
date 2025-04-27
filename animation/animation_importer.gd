@@ -54,9 +54,9 @@ func create_animation_resource():
 				#assuming theres only 1 animation per fbx file (standard mixamo output)
 				anim_lib.add_animation(file_name.get_file().get_basename(),anim)
 				lang_entries.add_item(file_name.get_file().get_basename())
-	
 	if not DirAccess.dir_exists_absolute(output_folder):
 		DirAccess.make_dir_recursive_absolute(output_folder)
 	var file_name = output_folder.path_join(output_name+".res")
+	lang_entries.save_language_file()
 	ResourceSaver.save(anim_lib,file_name)
 	

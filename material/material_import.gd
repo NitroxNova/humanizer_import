@@ -29,8 +29,9 @@ static func import_materials(equip_id:String):
 				for overlay in resource.overlays:
 					generate_images_for_overlay(file_name.get_base_dir(),overlay)
 			elif resource is HumanizerOverlay:
-				generate_images_for_overlay(file_name.get_base_dir(),resource)		
-					
+				generate_images_for_overlay(file_name.get_base_dir(),resource)
+	lang_entries.save_language_file()
+
 static func generate_images_for_overlay(folder:String,overlay:HumanizerOverlay):
 	for t_id in HumanizerMaterial.TEXTURE_LAYERS: #albedo, ao, normal
 		var path :String = overlay.get(t_id + "_texture_path")

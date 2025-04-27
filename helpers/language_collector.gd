@@ -5,7 +5,6 @@ var languages = PackedStringArray(["en"])
 const lang_file = "res://data/generated/languages.csv"
 func _init()->void:
 	_load_language_file()
-	pass
 
 func _load_language_file()->void:
 	if FileAccess.file_exists(lang_file):
@@ -13,16 +12,25 @@ func _load_language_file()->void:
 		var headder = csv_read.get_csv_line(",")
 		headder.remove_at(headder.find("keys",0))
 		languages = headder
+		while !csv_read.eof_reached():
+			var line = csv_read.get_csv_line(",")
+			var string_name = line.get(0)
+			if len(string_name)>0:
+				language_data[string_name]={}
+				line.remove_at(0)
+				for i in len(languages):
+					language_data[string_name][languages[i]]=line.get(i)
 
 func check_if_key_exists(string_key:String)->bool:
-	return (string_key in language_data.keys())
+	return language_data.has(string_key)
 
 func add_item(string_key:String)->void:
-	if check_if_key_exists:
-		push_warning("% already exists in database. Skipping." % [string_key])
+	if check_if_key_exists(string_key):
+		push_warning("%s already exists in database. Skipping." % [string_key])
 		return
 	else:
 		language_data[string_key]={"en":string_key}
+		
 
 func purge_language_file()->void:
 	languages = PackedStringArray(["en"])

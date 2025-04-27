@@ -28,7 +28,8 @@ static func run(input_folder:String):	#need to put this in a thread
 	save_file.store_var(data)
 	save_file.close()
 	print("Done Generating Targets") 
-			
+	lang_entries.save_language_file()
+
 static func process_target(file_path:String):
 	var data : PackedVector4Array = []  #xyz position and index
 	var target_file = FileAccess.open(file_path, FileAccess.READ)
