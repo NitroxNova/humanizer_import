@@ -4,7 +4,7 @@ class_name Animation_Importer
 		
 var input_folder = "res://data/input/animation"
 var output_name = "example"
-var output_folder = "res://humanizer/animation"
+var output_folder = "res://data/generated/animation"
 var add_root = true
 
 func run():
@@ -24,6 +24,7 @@ func create_import_settings():
 	ep.free()
 
 func create_animation_resource():
+	var lang_entries = LanguageCollector.new()
 	var anim_lib = AnimationLibrary.new()
 	for file_name in DirAccess.get_files_at(input_folder):
 		var file_path = input_folder.path_join(file_name)
@@ -52,6 +53,7 @@ func create_animation_resource():
 							anim.track_set_key_value(hips_pos_track,key,hips_pos)
 				#assuming theres only 1 animation per fbx file (standard mixamo output)
 				anim_lib.add_animation(file_name.get_file().get_basename(),anim)
+				lang_entries.add_item(file_name.get_file().get_basename())
 	
 	if not DirAccess.dir_exists_absolute(output_folder):
 		DirAccess.make_dir_recursive_absolute(output_folder)

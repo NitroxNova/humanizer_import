@@ -3,45 +3,43 @@ class_name HumanizerEquipmentImportService
 
 static func import(json_path:String,import_materials:=true):
 	#load settings
+	#print(json_path)
 	var settings = OSPath.read_json(json_path)
 	var folder = json_path.get_base_dir()
+	var lang_entries = LanguageCollector.new()
 	if import_materials:
 		#generate material files
 		HumanizerMaterialImportService.import_materials(settings.mhclo.get_file().get_basename())
 	#load mhclo
 	var mhclo := MHCLO.new()
 	mhclo.parse_file(settings.mhclo)
-	print('Importing asset ' + folder)
+	print('Importing asset ' + mhclo.resource_name)
 	# Build resource object
 	var equip_type := HumanizerEquipmentType.new()
 	# Mesh operations
 	_build_import_mesh(folder, mhclo)
-
+		
+	equip_type.path = folder
 	equip_type.resource_name = mhclo.resource_name
-	equip_type.path = "res://humanizer/equipment/"+ equip_type.resource_name 
 	equip_type.default_material = settings.default_material
 	equip_type.material_override = settings.material_override
-	var save_path = equip_type.path + "/" + equip_type.resource_name + '.res'
+	var save_path = folder.path_join(equip_type.resource_name + '.res')
 	var mats = HumanizerMaterialImportService.search_for_materials(mhclo.mhclo_path)
 	equip_type.textures = mats.materials
 	equip_type.overlays = mats.overlays
 	equip_type.display_name = settings.display_name
-
+	lang_entries.add_item(equip_type.display_name)
+	
 	equip_type.slots.clear()
 	for slot in settings.slots:
 		equip_type.slots.append(slot)
-	print("Added to slot: ", equip_type.slots)
-
+		if not(lang_entries.check_if_key_exists(slot)):
+			lang_entries.add_item(slot)
 	if equip_type.slots.is_empty():
-		printerr("Warning - " + equip_type.resource_name + " has no equipment slots, you can manually add them to the resource file.")
-
-	if folder.contains("/skins/"):
-		pass
-		#can move skins into default body material folder
-		#print("Detected Skin - Adding to the DefaultBody! ", folder)
-		
-	_calculate_bone_weights(mhclo,settings)
+		printerr("Warning - " + equip_type.resource_name + " has no equipment slots")
 	
+	_calculate_bone_weights(mhclo,settings)
+	lang_entries.save_language_file()
 	HumanizerResourceService.save_resource(save_path,equip_type)
 
 	#build rigged equipment
@@ -66,6 +64,10 @@ static func get_import_settings_path(equip_id:String)->String:
 	#print(json_path)
 	return json_path
 
+static func get_equipment_resource_path(mhclo_path)->String:
+	var res_path = mhclo_path.get_basename()
+	res_path += ".res"
+	return res_path
 
 static func load_import_settings(mhclo_path:String):
 	var json_path = get_import_settings_path(mhclo_path.get_file().get_basename())
@@ -98,11 +100,6 @@ static func load_import_settings(mhclo_path:String):
 		settings.slots = []
 		settings.slots.append_array(slots_ovr)
 	
-	if settings.slots.is_empty():
-		var tags = generate_tag_from_guess(mhclo_path.get_file().get_basename())
-		settings.slots = tags
-		print("Auto generated slots: ", tags)
-	
 	return settings
 
 static func search_for_material_override(mhclo_path:String):
@@ -134,21 +131,19 @@ static func import_all():
 
 static func purge_generated():
 	print("Purging Generated Resources - Keep import_settings.json")
-	var files:Array = OSPath.get_files_recursive("res://humanizer/")
+	var files:Array = OSPath.get_files_recursive("res://data/generated/")
 	files.append_array(OSPath.get_files_recursive("res://data/temp/"))
 	for file_path:String in files:
 		if file_path.ends_with("import_settings.json"):
 			pass #dont delete
-		elif "Body-Default" in file_path or "System_Macro_Targets" in file_path:
-			pass #dont delete system defaults 
 		else:
 			DirAccess.remove_absolute(file_path)
-	OSPath.delete_empty_folders("res://humanizer/")
+	OSPath.delete_empty_folders("res://data/generated/")
 	OSPath.delete_empty_folders("res://data/temp/")
 			
 static func get_generated_equipment_ids():
 	var equip = []
-	for filename:String in OSPath.get_files_recursive("res://data/generated"):
+	for filename:String in OSPath.get_files_recursive("res://data/generated/equipment"):
 		if filename.get_file() == "import_settings.json":
 			equip.append(filename.get_base_dir().get_file())
 	return equip
@@ -328,24 +323,3 @@ static func _build_rigged_bone_arrays(mhclo:MHCLO,glb:String) -> Dictionary:
 	rigged_bone_weights.weights = weights_override
 	rigged_bone_weights.config = bone_config
 	return rigged_bone_weights
-
-static func generate_tag_from_guess(name: String) -> Array:
-	# fallback if user doesnt use predefined slot config folders
-	# manual search... assets dont have some of them
-	var tags = []
-	var tag_lookup = {
-		"headclothes" : ["horn", "glasses", "hat", "mouth", "helmet", "antler", "veil", "cap", "beard", "bonnet", "mask", "moustache", "mask"],
-		"torsoclothes" : ["sweater", "tunic", "sash", "shirt", "robe", "bikini", "belt", "jacket", "suit", "vest", "dress", "bra", "top", "babydoll", "apron", "wings", "armor", "baby_doll", "uniform", "tank"],
-		"legsclothes" : ["stocking", "skirt", "trouser", "jeans", "pants", "panty", "thong", "shorts", "tail"],
-		"feetclothes" : ["shoe", "feet", "sock", "boot", "flats", "sneakers"],
-		"handsclothes" : ["guitar", "sleeve", "bow", "weapon"]
-	}
-	name = name.to_lower()
-	#print("Auto detecting tag from name...")
-	var found = false
-	for slot in tag_lookup.keys():
-		for item_tag in tag_lookup[slot]:
-			if name.contains(item_tag):
-				#print("Auto generated tag: ", slot, " contains ", item_tag)
-				tags.append(slot)
-	return tags

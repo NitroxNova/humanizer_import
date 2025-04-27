@@ -4,6 +4,7 @@ extends RefCounted
 
 # Process the shape key data.
 static func run(input_folder:String):	#need to put this in a thread
+	var lang_entries = LanguageCollector.new()#This needs to become thread stafe before putting it in threads
 	var data : Dictionary[String,PackedVector4Array] = {}
 	print('Collecting data from target files - ' + input_folder)
 	for file_path:String in OSPath.get_files_recursive(input_folder):
@@ -17,9 +18,10 @@ static func run(input_folder:String):	#need to put this in a thread
 				printerr("Duplicate target name " + target_name)
 				continue
 			data[target_name] = target_array
+			lang_entries.add_item(target_name)
 			print("Added Target " + target_name)
 			
-	var save_file_name = "res://humanizer/target/" + input_folder.get_file() + ".data"
+	var save_file_name = "res://data/generated/target/" + input_folder.get_file() + ".data"
 	if not DirAccess.dir_exists_absolute(save_file_name.get_base_dir()):
 		DirAccess.make_dir_absolute(save_file_name.get_base_dir())
 	var save_file = FileAccess.open(save_file_name,FileAccess.WRITE)
