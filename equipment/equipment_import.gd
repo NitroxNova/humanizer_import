@@ -18,12 +18,12 @@ static func import(json_path:String,import_materials:=true):
 	var equip_type := HumanizerEquipmentType.new()
 	# Mesh operations
 	_build_import_mesh(folder, mhclo)
-		
-	equip_type.path = folder
-	equip_type.resource_name = mhclo.resource_name
+	
+	equip_type.resource_name = mhclo.resource_name	
+	equip_type.path = "res://humanizer/equipment".path_join(equip_type.resource_name)
 	equip_type.default_material = settings.default_material
 	equip_type.material_override = settings.material_override
-	var save_path = folder.path_join(equip_type.resource_name + '.res')
+	var save_path = equip_type.path.path_join(equip_type.resource_name + '.res')
 	var mats = HumanizerMaterialImportService.search_for_materials(mhclo.mhclo_path)
 	equip_type.textures = mats.materials
 	equip_type.overlays = mats.overlays
@@ -131,19 +131,19 @@ static func import_all():
 
 static func purge_generated():
 	print("Purging Generated Resources - Keep import_settings.json")
-	var files:Array = OSPath.get_files_recursive("res://data/generated/")
+	var files:Array = OSPath.get_files_recursive("res://humanizer/equipment/")
 	files.append_array(OSPath.get_files_recursive("res://data/temp/"))
 	for file_path:String in files:
 		if file_path.ends_with("import_settings.json"):
 			pass #dont delete
 		else:
 			DirAccess.remove_absolute(file_path)
-	OSPath.delete_empty_folders("res://data/generated/")
+	OSPath.delete_empty_folders("res://humanizer/equipment/")
 	OSPath.delete_empty_folders("res://data/temp/")
 			
 static func get_generated_equipment_ids():
 	var equip = []
-	for filename:String in OSPath.get_files_recursive("res://data/generated/equipment"):
+	for filename:String in OSPath.get_files_recursive("res://data/generated/"):
 		if filename.get_file() == "import_settings.json":
 			equip.append(filename.get_base_dir().get_file())
 	return equip

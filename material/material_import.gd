@@ -15,7 +15,7 @@ static func import_materials(equip_id:String):
 		if file_name.get_extension() == "mhmat":
 			var new_mat = mhmat_to_material(file_name,equip_id)
 			var mat_id = file_name.get_file().get_basename()
-			var mat_path = "res://data/generated/material/" + equip_id
+			var mat_path = "res://humanizer/material/" + equip_id
 			mat_path = mat_path.path_join(mat_id + ".res")
 			HumanizerResourceService.save_resource(mat_path,new_mat)
 			lang_entries.add_item(mat_id)
@@ -26,22 +26,24 @@ static func import_materials(equip_id:String):
 		if file_name.get_extension() == "res":
 			var resource = load(file_name)
 			if resource is HumanizerMaterial:
-				for overlay in resource.overlays:
-					generate_images_for_overlay(file_name.get_base_dir(),overlay)
-			elif resource is HumanizerOverlay:
 				generate_images_for_overlay(file_name.get_base_dir(),resource)
+				var copy_mat_config = resource.duplicate(true)
+				ResourceSaver.save(copy_mat_config,"res://humanizer/material/" + equip_id + "/" + resource.resource_path.get_file())
+			#elif resource is HumanizerOverlay:
+				#generate_images_for_overlay(file_name.get_base_dir(),resource)
 	lang_entries.save_language_file()
 
-static func generate_images_for_overlay(folder:String,overlay:HumanizerOverlay):
-	for t_id in HumanizerMaterial.TEXTURE_LAYERS: #albedo, ao, normal
-		var path :String = overlay.get(t_id + "_texture_path")
-		if path not in [null,""]:
-			var path_split = path.split("/") # equip_id / image_name
-			for ext in ["png","jpg","jpeg"]:
-				var test_path = folder.path_join(path_split[1] + "." + ext)				
-				if FileAccess.file_exists(test_path):
-					var is_normal = (t_id == "normal")
-					generate_portable_texture(test_path,path_split[0],is_normal,false)
+static func generate_images_for_overlay(folder:String,mat_config:HumanizerMaterial):
+	for texture_name in mat_config.texture_overlays:
+		for layer in mat_config.texture_overlays[texture_name]: #albedo, ao, normal
+			if "texture" in layer:
+				var path = layer.texture
+				var path_split = path.split("/") # equip_id / image_name
+				for ext in ["png","jpg","jpeg"]:
+					var test_path = folder.path_join(path_split[1] + "." + ext)				
+					if FileAccess.file_exists(test_path):
+						var is_normal = (texture_name == "normal")
+						generate_portable_texture(test_path,path_split[0],is_normal,false)
 				
 static func search_for_materials(mhclo_path:String):
 	var materials = {}
@@ -64,10 +66,15 @@ static func get_manual_materials(equip_id:String): #custom defined materials
 	for mat_file in OSPath.get_files_recursive(materials_path):
 		if mat_file.get_extension() == "res":
 			var mat_res = load(mat_file)
-			if mat_res is HumanizerMaterial or mat_res is StandardMaterial3D:
+			if mat_res is HumanizerMaterial:
+				if mat_res.base_material == "":
+					overlays[mat_file.get_file().get_basename()] = mat_file
+				else:
+					materials[mat_file.get_file().get_basename().get_basename()] = mat_file
+					
+			if mat_res is StandardMaterial3D:
 				materials[mat_file.get_file().get_basename().get_basename()] = mat_file
-			elif mat_res is HumanizerOverlay:
-				overlays[mat_file.get_file().get_basename()] = mat_file
+				
 	
 	return {materials=materials,overlays=overlays}
 	
@@ -100,14 +107,17 @@ static func default_material_from_mhclo(mhclo:MHCLO):
 	return default_material
 
 static func generate_portable_texture(image_path:String,equip_id:String,is_normal:bool,is_bump:bool):
-	var image : Image = Image.load_from_file(image_path)
+	#because we dont want to use the default compressed import settings, want to be able to control that
+	#still not sure what settings we actually do want to use
+	#@warning_ignore() use globalize path to hide warning 
+	var image : Image = Image.load_from_file(ProjectSettings.globalize_path(image_path))
 	if is_bump:
 		image.bump_map_to_normal_map()
 		is_normal = true
 	image.generate_mipmaps(is_normal)
 	var texture = PortableCompressedTexture2D.new()
 	texture.create_from_image(image,PortableCompressedTexture2D.COMPRESSION_MODE_LOSSLESS) 
-	var save_path = "res://data/generated/material/"+equip_id
+	var save_path = "res://humanizer/material/"+equip_id
 	if not DirAccess.dir_exists_absolute(save_path):
 		DirAccess.make_dir_recursive_absolute(save_path)
 	save_path = save_path.path_join(image_path.get_file().get_basename())
@@ -123,7 +133,8 @@ static func make_portable_material(folder:String,file_name:String,equip_id:Strin
 	var image_path = folder.path_join(file_name)
 	var is_normal = (texture_prop=="normal_texture")
 	var is_bump = (texture_prop=="bump_texture")
-	
+	if is_bump:
+		texture_prop = "normal_texture"
 	material[texture_prop] = generate_portable_texture(image_path,equip_id,is_normal,is_bump)
 	
 	

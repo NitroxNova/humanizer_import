@@ -35,14 +35,11 @@ func init_contents_tree():
 		var mat_path = "res://humanizer/material/" + equip_id
 		if DirAccess.dir_exists_absolute(mat_path):
 			files.append_array(OSPath.get_files_recursive(mat_path))
-		mat_path = "res://data/input/material/" + equip_id
-		if DirAccess.dir_exists_absolute(mat_path):
-			files.append_array(OSPath.get_files_recursive(mat_path))
 		for mat_file in files:
 			if mat_file.get_extension() == "res":
 				var resource = load(mat_file)
 				#exclude compressed image resources
-				if resource is StandardMaterial3D or resource is HumanizerMaterial or resource is HumanizerOverlay:
+				if resource is StandardMaterial3D or resource is HumanizerMaterial:
 					var mat_id = mat_file.get_file().get_basename()
 					var mat:TreeItem = tree.create_item(equip)
 					mat.set_cell_mode(0,TreeItem.CELL_MODE_CHECK)
