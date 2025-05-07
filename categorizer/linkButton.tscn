@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://jm3vldogu1f2"]
+
+[ext_resource type="Script" uid="uid://bj40hilfvtrdu" path="res://addons/humanizer_import/Categorizer/link_button.gd" id="1_xqti2"]
+
+[node name="LinkButton" type="Button"]
+size_flags_horizontal = 3
+toggle_mode = true
+script = ExtResource("1_xqti2")
+
+[connection signal="toggled" from="." to="." method="_on_toggled"]
