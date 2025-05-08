@@ -31,6 +31,9 @@ size_flags_horizontal = 3
 layout_mode = 2
 text = "Configuration"
 
+[node name="HSeparator2" type="HSeparator" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+
 [node name="Item" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
 layout_mode = 2
 
@@ -53,6 +56,9 @@ text = "Category"
 layout_mode = 2
 size_flags_horizontal = 3
 
+[node name="HSeparator3" type="HSeparator" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+
 [node name="itemmanagement" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
 layout_mode = 2
 
@@ -70,25 +76,25 @@ custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 text = "Remove Category"
 
-[node name="categories" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
+[node name="HSeparator4" type="HSeparator" parent="HBoxContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="HBoxContainer/VBoxContainer/categories"]
+[node name="Link Management" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
 layout_mode = 2
-text = "New Category"
 
-[node name="newCatName" type="TextEdit" parent="HBoxContainer/VBoxContainer/categories"]
+[node name="Link Lable" type="Label" parent="HBoxContainer/VBoxContainer/Link Management"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+text = "Linked Items"
+
+[node name="VSeparator" type="VSeparator" parent="HBoxContainer/VBoxContainer/Link Management"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Create Category" type="Button" parent="HBoxContainer/VBoxContainer/categories"]
+[node name="RemoveLink" type="Button" parent="HBoxContainer/VBoxContainer/Link Management"]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
-text = "Create"
-
-[node name="Label2" type="Label" parent="HBoxContainer/VBoxContainer"]
-layout_mode = 2
-text = "Linked Items"
+text = "Remove Link"
 
 [node name="ScrollContainer" type="ScrollContainer" parent="HBoxContainer/VBoxContainer"]
 layout_mode = 2
@@ -97,19 +103,43 @@ size_flags_vertical = 3
 [node name="links" type="VBoxContainer" parent="HBoxContainer/VBoxContainer/ScrollContainer"]
 layout_mode = 2
 
+[node name="categories" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/VBoxContainer/categories"]
+layout_mode = 2
+text = "New Category"
+
+[node name="newCatName" type="LineEdit" parent="HBoxContainer/VBoxContainer/categories"]
+layout_mode = 2
+size_flags_horizontal = 3
+context_menu_enabled = false
+emoji_menu_enabled = false
+shortcut_keys_enabled = false
+drag_and_drop_selection_enabled = false
+
+[node name="Create Category" type="Button" parent="HBoxContainer/VBoxContainer/categories"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+text = "Create"
+
+[node name="HSeparator" type="HSeparator" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+
 [node name="Buttons" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="RemoveLink" type="Button" parent="HBoxContainer/VBoxContainer/Buttons"]
+[node name="save" type="Button" parent="HBoxContainer/VBoxContainer/Buttons"]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
-text = "Remove Link"
+size_flags_horizontal = 8
+text = "Save"
 
-[node name="VSeparator" type="VSeparator" parent="HBoxContainer/VBoxContainer/Buttons"]
+[node name="VSeparator2" type="VSeparator" parent="HBoxContainer/VBoxContainer/Buttons"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Export" type="Button" parent="HBoxContainer/VBoxContainer/Buttons"]
+[node name="export" type="Button" parent="HBoxContainer/VBoxContainer/Buttons"]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 size_flags_horizontal = 8
@@ -124,7 +154,10 @@ size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="HBoxContainer/DemoArea"]
 layout_mode = 2
-text = "EXAMPLE"
+text = "EXAMPLE RELATIONSHIPS"
+
+[node name="HSeparator" type="HSeparator" parent="HBoxContainer/DemoArea"]
+layout_mode = 2
 
 [node name="TabContainer" type="TabContainer" parent="HBoxContainer/DemoArea"]
 layout_mode = 2
@@ -133,6 +166,7 @@ size_flags_vertical = 3
 
 [connection signal="pressed" from="HBoxContainer/VBoxContainer/itemmanagement/LinkButton" to="." method="_on_link_button_pressed"]
 [connection signal="pressed" from="HBoxContainer/VBoxContainer/itemmanagement/RemoveCategory" to="." method="_on_remove_category_pressed"]
+[connection signal="pressed" from="HBoxContainer/VBoxContainer/Link Management/RemoveLink" to="." method="_on_remove_link_pressed"]
 [connection signal="pressed" from="HBoxContainer/VBoxContainer/categories/Create Category" to="." method="_on_create_category_pressed"]
-[connection signal="pressed" from="HBoxContainer/VBoxContainer/Buttons/RemoveLink" to="." method="_on_remove_link_pressed"]
-[connection signal="pressed" from="HBoxContainer/VBoxContainer/Buttons/Export" to="." method="_on_export_pressed"]
+[connection signal="pressed" from="HBoxContainer/VBoxContainer/Buttons/save" to="." method="_on_save_pressed"]
+[connection signal="pressed" from="HBoxContainer/VBoxContainer/Buttons/export" to="." method="_on_export_pressed"]
