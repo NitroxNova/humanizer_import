@@ -29,8 +29,16 @@ static func import_materials(equip_id:String):
 				generate_images_for_overlay(file_name.get_base_dir(),resource)
 				var copy_mat_config = resource.duplicate(true)
 				ResourceSaver.save(copy_mat_config,"res://humanizer/material/" + equip_id + "/" + resource.resource_path.get_file())
-			#elif resource is HumanizerOverlay:
-				#generate_images_for_overlay(file_name.get_base_dir(),resource)
+			elif resource is StandardMaterial3D:
+				var copy_material = resource.duplicate(true)
+				for property in HumanizerMaterial.material_property_names:
+					if copy_material[property] is Texture2D:
+						var texture = resource[property]
+						var is_normal = (property == "normal_texture")
+						#print(texture.resource_path)
+						var ctex = generate_portable_texture(texture.resource_path,equip_id,is_normal,false)
+						copy_material[property] = ctex
+				ResourceSaver.save(copy_material,"res://humanizer/material/" + equip_id + "/" + resource.resource_path.get_file())		
 	lang_entries.save_language_file()
 
 static func generate_images_for_overlay(folder:String,mat_config:HumanizerMaterial):

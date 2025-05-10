@@ -55,7 +55,7 @@ static func generate_zip(pack_name:String):
 			HumanizerResourceService.save_resource(temp_path,mat_res)
 			zip_writer_copy_file(writer,"res://data/temp/material.res",export_folder.path_join( file_path.get_file()))
 		elif file_res is HumanizerMaterial:
-			var equip_id = file_path.split("/",false)[4] #res://data/input/material/ Equip_ID
+			var equip_id = file_path.get_base_dir().get_file() #res://data/input/material/ Equip_ID
 			var export_folder = "humanizer/material/".path_join(equip_id)
 			store_textures_from_overlay(writer,file_res.texture_overlays,file_path.get_base_dir(),equip_id)
 			zip_writer_copy_file(writer,file_path,export_folder.path_join( file_path.get_file()))
