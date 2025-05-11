@@ -70,13 +70,10 @@ static func store_textures_from_overlay(writer:ZIPPacker ,overlay_config:Diction
 		for layer in overlay_config[texture_name]:
 			if "texture" in layer:
 				var t_path = layer.texture
-				#see if theres an image in the folder with the same name, otherwise assume its imported in a different pack
-				var local_texture_path = input_folder.path_join(t_path.get_file())
-				for ext in ["png","jpg","jpeg"]:
-					if FileAccess.file_exists(local_texture_path+"."+ext):
-						var ctex_path = "res://humanizer/material/"+ equip_id.path_join(t_path.get_file()+".image.res")
-						var new_texture_path = "humanizer/material/"+ equip_id.path_join(t_path.get_file()+".image.res")
-						zip_writer_copy_file(writer,ctex_path,new_texture_path)
+				var ctex_path:String = "res://humanizer/material/"+t_path+".image.res"
+				if FileAccess.file_exists(ctex_path):
+					var new_texture_path = ctex_path.trim_prefix("res://")
+					zip_writer_copy_file(writer,ctex_path,new_texture_path)
 	
 static func zip_writer_save_json(writer:ZIPPacker,data,new_path:String):
 	writer.start_file(new_path)
