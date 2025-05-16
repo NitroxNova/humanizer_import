@@ -1,3 +1,4 @@
+@tool
 extends Window
 @export var itemSelect:OptionButton
 @export var parentSelect:OptionButton
@@ -13,6 +14,9 @@ const tab = "  "
 const root = "Root"
 
 func _ready():
+	init_options()
+
+func init_options():
 	#add Root this aways has to be availible
 	parentSelect.add_item(root)
 	#create a look up, when loading it  isnt possible to know if something is a slot or an empty category
@@ -223,3 +227,7 @@ func _on_save_pressed() -> void:
 		dir.make_dir("res://data/generated/menus")
 	var save_file = FileAccess.open("res://data/generated/menus/menu.json",FileAccess.WRITE)
 	save_file.store_line(JSON.stringify(relationships))
+
+func _on_close_requested() -> void:
+	get_parent().remove_child(self)
+	queue_free()

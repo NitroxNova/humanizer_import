@@ -1,3 +1,4 @@
+@tool
 extends Button
 @export var parent:String
 @export var child:String

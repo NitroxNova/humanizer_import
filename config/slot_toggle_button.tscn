@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://d07wkqibuxkcc"]
+
+[ext_resource type="Script" uid="uid://1js666f7fhcm" path="res://addons/humanizer_import/config/slot_toggle_button.gd" id="1_18y5l"]
+
+[node name="Control" type="Button"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+toggle_mode = true
+script = ExtResource("1_18y5l")
+
+[connection signal="toggled" from="." to="." method="_on_toggled"]
