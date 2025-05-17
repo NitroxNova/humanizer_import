@@ -1,0 +1,135 @@
+[gd_scene load_steps=4 format=3 uid="uid://cvts62hykhlxb"]
+
+[ext_resource type="Script" uid="uid://dycammikhqxg4" path="res://addons/humanizer_import/config/settings.gd" id="1_beaby"]
+[ext_resource type="PackedScene" uid="uid://d07wkqibuxkcc" path="res://addons/humanizer_import/config/slot_toggle_button.tscn" id="2_pjma7"]
+[ext_resource type="PackedScene" uid="uid://ctbm6h1jqy5vv" path="res://addons/humanizer_import/config/folder_area.tscn" id="3_6fbha"]
+
+[node name="popup" type="Window" node_paths=PackedStringArray("slots_vbox", "folders_vbox", "folder_name_entry", "slot_name_entry")]
+position = Vector2i(0, 36)
+size = Vector2i(500, 600)
+script = ExtResource("1_beaby")
+slots_vbox = NodePath("VBoxContainer/Settings/Equipment/selectionsScroll/selectionArea/slots")
+folders_vbox = NodePath("VBoxContainer/Settings/Equipment/folders/folders_area/folders")
+folder_name_entry = NodePath("VBoxContainer/Settings/Equipment/folders/add_folder/folder_name")
+slot_name_entry = NodePath("VBoxContainer/Settings/Equipment/selectionsScroll/HBoxContainer/HBoxContainer/slot_name")
+slots_toggle_button = ExtResource("2_pjma7")
+folder_area = ExtResource("3_6fbha")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Settings" type="TabContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+current_tab = 0
+
+[node name="Equipment" type="HBoxContainer" parent="VBoxContainer/Settings"]
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="selectionsScroll" type="VBoxContainer" parent="VBoxContainer/Settings/Equipment"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Slots LBL" type="Label" parent="VBoxContainer/Settings/Equipment/selectionsScroll"]
+layout_mode = 2
+text = "Slots"
+
+[node name="selectionArea" type="ScrollContainer" parent="VBoxContainer/Settings/Equipment/selectionsScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="slots" type="VBoxContainer" parent="VBoxContainer/Settings/Equipment/selectionsScroll/selectionArea"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="VBoxContainer" parent="VBoxContainer/Settings/Equipment/selectionsScroll"]
+layout_mode = 2
+
+[node name="HSeparator" type="HSeparator" parent="VBoxContainer/Settings/Equipment/selectionsScroll/HBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/Settings/Equipment/selectionsScroll/HBoxContainer"]
+layout_mode = 2
+
+[node name="slot_name" type="LineEdit" parent="VBoxContainer/Settings/Equipment/selectionsScroll/HBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VSeparator" type="VSeparator" parent="VBoxContainer/Settings/Equipment/selectionsScroll/HBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="add_slot" type="Button" parent="VBoxContainer/Settings/Equipment/selectionsScroll/HBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "Add Slot"
+
+[node name="HSeparator2" type="HSeparator" parent="VBoxContainer/Settings/Equipment/selectionsScroll/HBoxContainer"]
+layout_mode = 2
+
+[node name="remove_slot" type="Button" parent="VBoxContainer/Settings/Equipment/selectionsScroll/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "Remove Slot"
+
+[node name="VSeparator" type="VSeparator" parent="VBoxContainer/Settings/Equipment"]
+layout_mode = 2
+
+[node name="folders" type="VBoxContainer" parent="VBoxContainer/Settings/Equipment"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Folders" type="Label" parent="VBoxContainer/Settings/Equipment/folders"]
+layout_mode = 2
+text = "Folders"
+
+[node name="folders_area" type="ScrollContainer" parent="VBoxContainer/Settings/Equipment/folders"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="folders" type="VBoxContainer" parent="VBoxContainer/Settings/Equipment/folders/folders_area"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="buttons" type="HBoxContainer" parent="VBoxContainer/Settings/Equipment/folders"]
+layout_mode = 2
+
+[node name="remove_folder" type="Button" parent="VBoxContainer/Settings/Equipment/folders/buttons"]
+layout_mode = 2
+text = "Remove Folder "
+
+[node name="add_folder" type="HBoxContainer" parent="VBoxContainer/Settings/Equipment/folders"]
+layout_mode = 2
+
+[node name="folder_name" type="LineEdit" parent="VBoxContainer/Settings/Equipment/folders/add_folder"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="add_folder" type="Button" parent="VBoxContainer/Settings/Equipment/folders/add_folder"]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "Add Folder"
+
+[node name="GlobalButtons" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+
+[node name="save" type="Button" parent="VBoxContainer/GlobalButtons"]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "Save"
+
+[connection signal="about_to_popup" from="." to="." method="_on_about_to_popup"]
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]
+[connection signal="pressed" from="VBoxContainer/Settings/Equipment/selectionsScroll/HBoxContainer/HBoxContainer/add_slot" to="." method="_on_add_slot_pressed"]
+[connection signal="pressed" from="VBoxContainer/Settings/Equipment/selectionsScroll/HBoxContainer/remove_slot" to="." method="_on_remove_slot_pressed"]
+[connection signal="pressed" from="VBoxContainer/Settings/Equipment/folders/buttons/remove_folder" to="." method="_on_remove_folder_pressed"]
+[connection signal="pressed" from="VBoxContainer/Settings/Equipment/folders/add_folder/add_folder" to="." method="_on_add_folder_pressed"]
+[connection signal="pressed" from="VBoxContainer/GlobalButtons/save" to="." method="_on_save_pressed"]

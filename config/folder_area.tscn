@@ -1,0 +1,29 @@
+[gd_scene load_steps=2 format=3 uid="uid://ctbm6h1jqy5vv"]
+
+[ext_resource type="Script" uid="uid://cqeg8rpa053ow" path="res://folder_area.gd" id="1_g1ndv"]
+
+[node name="folder_area" type="HBoxContainer" node_paths=PackedStringArray("select_button", "left_right_check")]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 31.0
+grow_horizontal = 2
+size_flags_horizontal = 3
+script = ExtResource("1_g1ndv")
+select_button = NodePath("Button")
+left_right_check = NodePath("CheckBox")
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+text = "Folder"
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+text = "Left/Right"
+
+[node name="CheckBox" type="CheckBox" parent="."]
+layout_mode = 2
+
+[connection signal="toggled" from="Button" to="." method="_on_button_toggled"]
+[connection signal="toggled" from="CheckBox" to="." method="_on_check_box_toggled"]

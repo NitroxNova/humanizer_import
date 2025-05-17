@@ -5,24 +5,6 @@ extends EditorPlugin
 var thread := Thread.new()
 
 func _enter_tree():
-	
-	var path = "res://data/input"
-	if not DirAccess.dir_exists_absolute(path):
-		DirAccess.make_dir_absolute(path)
-	if not DirAccess.dir_exists_absolute(path+"/target"):
-		DirAccess.make_dir_absolute(path+"/target")
-	if not DirAccess.dir_exists_absolute(path+"/material"):
-		DirAccess.make_dir_absolute(path+"/material")
-	if not DirAccess.dir_exists_absolute(path+"/equipment"):
-		DirAccess.make_dir_absolute(path+"/equipment")
-	if not DirAccess.dir_exists_absolute(path+"/animation"):
-		DirAccess.make_dir_absolute(path+"/animation")
-
-	#make defined slot folders
-	for foldername in ProjectSettings.get_setting_with_override("addons/humanizer_import/slot_folder_config"):
-		if not DirAccess.dir_exists_absolute(path+"/equipment/"+foldername):
-			DirAccess.make_dir_absolute(path+"/equipment/"+foldername)	
-	
 	_add_tool_submenu()
 	HumanizerImportConfig.init_settings()
 
@@ -36,7 +18,6 @@ func _add_tool_submenu():
 	popup_menu.add_item("Animations")
 	popup_menu.set_item_metadata(popup_menu.item_count-1,run_animation_importer)
 	
-	
 	var equipment_menu = PopupMenu.new()
 	equipment_menu.add_item("Manual Import")
 	equipment_menu.set_item_metadata(equipment_menu.item_count-1,run_equipment_importer)
@@ -46,10 +27,17 @@ func _add_tool_submenu():
 	equipment_menu.set_item_metadata(equipment_menu.item_count-1,HumanizerEquipmentImportService.purge_generated)
 	popup_menu.add_submenu_node_item('Equipment', equipment_menu)
 	
+	popup_menu.add_item("Categorize Slots")
+	popup_menu.set_item_metadata(popup_menu.item_count-1,run_categorizer)
+
+	
 	popup_menu.add_item("Targets")
 	popup_menu.set_item_metadata(popup_menu.item_count-1,run_target_importer)
 	
 	var internal_menu = PopupMenu.new()
+	internal_menu.add_item('Edit Settings')
+	internal_menu.set_item_metadata(internal_menu.item_count-1,edit_settings)
+
 	internal_menu.add_item("Generate Basis")
 	internal_menu.set_item_metadata(internal_menu.item_count-1,HumanizerBaseMeshReader.run)
 	
@@ -80,7 +68,12 @@ func handle_menu_event(id:int,popup_menu:PopupMenu):
 func run_animation_importer():
 	var popup = load("res://addons/humanizer_import/animation/menu_popup.tscn").instantiate()
 	get_editor_interface().call_deferred("popup_dialog",popup)
-	
+
+func run_categorizer():
+	var popup = load("res://addons/humanizer_import/categorizer/categorizer.tscn").instantiate()
+	get_editor_interface().call_deferred("popup_dialog",popup)
+
+
 func run_equipment_importer():
 	var popup = load("res://addons/humanizer_import/equipment/menu_popup.tscn").instantiate()
 	get_editor_interface().call_deferred("popup_dialog",popup)
@@ -95,6 +88,9 @@ func generate_zip():
 	var popup = load("res://addons/humanizer_import/pack/popup.tscn").instantiate()
 	get_editor_interface().call_deferred("popup_dialog",popup)
 
+func edit_settings():
+	var popup = load("res://addons/humanizer_import/config/settings.tscn").instantiate()
+	get_editor_interface().call_deferred("popup_dialog",popup)
 #func _process_raw_data() -> void:
 	#print_debug('Running all preprocessing')
 	#for task in [
