@@ -7,6 +7,7 @@ var thread := Thread.new()
 func _enter_tree():
 	_add_tool_submenu()
 	HumanizerImportConfig.init_settings()
+	HumanizerTargetService.load_basis()
 
 func _exit_tree():
 	remove_tool_menu_item('Humanizer Import')	
