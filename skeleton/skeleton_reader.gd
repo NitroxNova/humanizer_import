@@ -22,8 +22,10 @@ func _init(_file_path:String):
 		var bone_id = recursive_add_bone(bone_name)
 	load_bone_config()
 	load_bone_weights()
-	var skeleton_data = HumanizerRigService.init_skeleton_data(skeleton)
 	var helpers = HumanizerTargetService.init_helper_vertex()
+	#have to set bone rotations before initing the data, then can set positions
+	set_bone_rotations(helpers,skeleton)
+	var skeleton_data = HumanizerRigService.init_skeleton_data(skeleton)
 	HumanizerRigService.adjust_bone_positions(skeleton_data,rig,helpers,{},{})
 	HumanizerRigService.adjust_skeleton_3D(skeleton,skeleton_data)
 	retarget_bone_names()
@@ -32,12 +34,44 @@ func _init(_file_path:String):
 	rig_save_path = rig_save_path.replace(".json",".res")
 	if not DirAccess.dir_exists_absolute(rig_save_path.get_base_dir()):
 		DirAccess.make_dir_absolute(rig_save_path.get_base_dir())
+	
 	var packed_skeleton = PackedScene.new()
 	#skeleton.owner = skeleton
 	packed_skeleton.pack(skeleton)
 	rig.skeleton = packed_skeleton
 	ResourceSaver.save(rig,rig_save_path)
 
+func set_bone_rotations(helper_vertex:Array,skeleton:Skeleton3D):
+	var matrix_world = []
+	for bone_id in rig.config.size():
+		var bone_name = skeleton.get_bone_name(bone_id)
+		#print(bone_name)
+		var head_position = HumanizerRigService.get_bone_position_from_config(rig,bone_id,"head",helper_vertex)
+		var tail_position = HumanizerRigService.get_bone_position_from_config(rig,bone_id,"tail",helper_vertex)
+		var roll = rig.config[bone_id].roll
+		var bone_rotation = get_bone_quat_from_position_roll(head_position,tail_position,roll)
+		var bone_matrix = Basis(Vector3(bone_rotation[0][0],bone_rotation[0][1],bone_rotation[0][2]),Vector3(bone_rotation[1][0],bone_rotation[1][1],bone_rotation[1][2]),Vector3(bone_rotation[2][0],bone_rotation[2][1],bone_rotation[2][2]))
+		#print("matrix world")
+		#print(bone_matrix)
+		matrix_world.append(bone_matrix)
+		var parent_id = skeleton.get_bone_parent(bone_id)
+		var local_rotation :Basis = bone_matrix
+		if parent_id > -1:
+			var parent_inverse = matrix_world[parent_id].inverse()
+			#print("parent inverse")
+			#print(parent_inverse)
+			local_rotation = parent_inverse * bone_matrix
+		#print("local rotation")
+		#print(local_rotation)
+		#print("quaternion")
+		var quat = local_rotation.get_rotation_quaternion()
+		quat = Quaternion(quat.x,quat.z,-quat.y,quat.w)
+		#print(quat)
+		#var local_rotation = bone_rotation * global_rotation[skeleton.get_bone_parent(bone_id)].inverse()
+		#print(local_rotation)
+		skeleton.set_bone_rest(bone_id,Transform3D(Basis(quat),Vector3.ZERO))
+		#print()
+		
 func recursive_add_bone(bone_name):
 	var bone_data = contents[bone_name]
 	var safe_name = safe_bone_name(bone_name)
@@ -179,8 +213,10 @@ func retarget_bone_names():
 		retarget_names[side+"Toes"] = get_child_bone_with_pattern_recursive(retarget_names[side+"Foot"],["toe","ball"],side.to_lower(),1) 
 		#arms
 		#retarget_names[side+"Shoulder"] = get_child_bone_with_pattern(retarget_names["UpperChest"],["shoulder","clavicle"],side.to_lower())
-		retarget_names[side+"Shoulder"] = get_child_bone_with_pattern(retarget_names["UpperChest"],["shoulder"],side.to_lower())
+		retarget_names[side+"Shoulder"] = get_child_bone_with_pattern_recursive(retarget_names["UpperChest"],["shoulder"],side.to_lower(),2)
 		#default rig has clavicle and shoulder, using clavicle as shoulder since its closer to mixamo, but may change
+		if retarget_names[side+"Shoulder"] == null:
+			retarget_names[side+"Shoulder"] = get_child_bone_with_pattern_recursive(retarget_names["UpperChest"],["clavicle"],side.to_lower(),2)
 		retarget_names[side+"UpperArm"] = get_child_bone_with_pattern_recursive(retarget_names[side+"Shoulder"],["arm"],side.to_lower(),2) 
 		retarget_names[side+"LowerArm"] = get_child_bone_with_pattern_recursive(retarget_names[side+"UpperArm"],["forearm","lowerarm"],side.to_lower(),2) 
 		retarget_names[side+"Hand"] = get_child_bone_with_pattern_recursive(retarget_names[side+"LowerArm"],["hand"],side.to_lower(),2) 
@@ -273,13 +309,17 @@ func get_bone_stack(bone_id:int,contains:Array,side:String,list:Array=[]):
 	return list
 	
 static func get_bone_quat_from_position_roll(position1:Vector3,position2:Vector3,roll:float):
+	position1 = Vector3(position1.x,-position1.z,position1.y)
+	position2 = Vector3(position2.x,-position2.z,position2.y)
+	#print(roll)
+	#roll = deg_to_rad(roll) - roll is already in radians
 	var bone_vector = position2 - position1
-	var rMatrix = Skeleton_Reader.vec_roll_to_mat3(bone_vector,0)
+	var rMatrix = Skeleton_Reader.vec_roll_to_mat3(bone_vector,roll)
 	#print(rMatrix)
 	#var xform_matrix = Skeleton_Reader.rot_pos_to_m4(rMatrix,position1)
 	rMatrix = Skeleton_Reader.swizzle_rotation_matrix_y_up(rMatrix)
 	##xform_matrix = Skeleton_Reader.mul_m4db_m4db_m4fl(axis_basis_change,xform_matrix)
-	print(rMatrix)
+	#print(rMatrix)
 	#var decompose = Skeleton_Reader.decompose_matrix4(xform_matrix)
 	##print(decompose.rotation_m3[2][1])
 	#rMatrix = decompose.rotation_m3
@@ -287,8 +327,8 @@ static func get_bone_quat_from_position_roll(position1:Vector3,position2:Vector3
 	#var r_quat = r_basis.get_rotation_quaternion()
 	var rotation_quaternion = Skeleton_Reader.mat3_normalized_to_quat_fast( rMatrix);
 	#rotate for up
-	rotation_quaternion = [rotation_quaternion[1],rotation_quaternion[3],-rotation_quaternion[2],rotation_quaternion[0]]
-	return rotation_quaternion
+	rotation_quaternion = Quaternion(rotation_quaternion.y,rotation_quaternion.w,-rotation_quaternion.z,rotation_quaternion.x)
+	return rMatrix
 	#$%rotation_label.text = str(rotation_quaternion)
 
 #func vec_roll_to_mat3_normalized(const float nor[3], const float roll, float r_mat[3][3])->void:
@@ -297,7 +337,8 @@ static func vec_roll_to_mat3_normalized(nor:Vector3, roll:float):
 	#/**
 	#* P.S. In the end, this basically is a heavily optimized version of Damped Track +Y.
 	#*/
-	print("normal " + str(nor))
+	#print("normal " + str(nor))
+	#print("roll " + str(roll))
 	const SAFE_THRESHOLD:float = 6.1e-3;     #/* Theta above this value has good enough precision. */
 	const CRITICAL_THRESHOLD:float = 2.5e-4; #/* True singularity if XZ distance is below this. */
 	const THRESHOLD_SQUARED:float = CRITICAL_THRESHOLD * CRITICAL_THRESHOLD;
@@ -357,12 +398,12 @@ static func vec_roll_to_mat3_normalized(nor:Vector3, roll:float):
 #
 	#/* Combine and output result */
 	var r_mat = mul_m3_m3(rMatrix, bMatrix);
-	print("rMatrix")
-	print(rMatrix)
-	print("bMatrix")
-	print(bMatrix)
-	print("r_mat")
-	print(r_mat)
+	#print("rMatrix")
+	#print(rMatrix)
+	#print("bMatrix")
+	#print(bMatrix)
+	#print("r_mat")
+	#print(r_mat)
 	return r_mat
 	#}
 #
@@ -539,12 +580,10 @@ static func mat3_normalized_to_quat_fast(mat:Array):
 	#const float threshold = 0.0002f /* #BLI_ASSERT_UNIT_EPSILON */ * 3;
 	#if (fabs(q_len_squared - 1.0f) >= threshold) {
 		#normalize_qt(q);
-		
-	#var quat = Quaternion(q[0],q[1],q[2],q[3])
-	#quat = quat.normalized()
+	var quat = Quaternion(q[0],q[1],q[2],q[3])
+	quat = quat.normalized()
+	return quat
 	
-	return q
-
 
 #void mat3_to_rot_size(float rot[3][3], float size[3], const float mat3[3][3])
 static func mat3_to_rot_size(rot:Array, size:Vector3, mat3:Array):
