@@ -38,7 +38,7 @@ static func import(json_path:String,import_materials:=true):
 	if equip_type.slots.is_empty():
 		printerr("Warning - " + equip_type.resource_name + " has no equipment slots")
 	
-	_calculate_bone_weights(mhclo,settings)
+	#_calculate_bone_weights(mhclo,settings)
 	lang_entries.save_language_file()
 	HumanizerResourceService.save_resource(save_path,equip_type)
 
@@ -168,11 +168,11 @@ static func scan_for_missing_import_settings(path):
 			var equip_settings = HumanizerEquipmentImportService.load_import_settings(file)
 			HumanizerResourceService.save_resource(settings_path,equip_settings)
 	
-static func _calculate_bone_weights(mhclo:MHCLO,import_settings:Dictionary):
-	for rig_name in HumanizerRegistry.rigs:
-		var rig : HumanizerRig = HumanizerRegistry.rigs[rig_name]
-		var skeleton_data = HumanizerRigService.init_skeleton_data(rig,false)
-		HumanizerEquipmentService.interpolate_weights( mhclo,rig,skeleton_data)
+#static func _calculate_bone_weights(mhclo:MHCLO,import_settings:Dictionary):
+	#for rig_name in HumanizerRegistry.rigs:
+		#var rig : HumanizerRig = HumanizerRegistry.rigs[rig_name]
+		#var skeleton_data = HumanizerRigService.init_skeleton_data(rig)
+		#HumanizerEquipmentService.interpolate_weights( mhclo,rig,skeleton_data)
 			
 
 static func _calculate_attached_bone_weights(mhclo:MHCLO,import_settings:Dictionary,equip_type:HumanizerEquipmentType):

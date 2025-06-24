@@ -148,6 +148,23 @@ func load_bone_weights():
 			bw_pair[1] /= weight_sum
 	rig.weights = out_data
 	
+	## Build cross reference dicts to easily map between a vertex group index and # a vertex group name
+	#var group_index = []
+	#for bone_name in bone_weights.names:
+		#var new_bone_id = skeleton_data.keys().find(bone_name)
+		#if new_bone_id == -1:
+			#if bone_name.begins_with('toe'):
+				#if bone_name.ends_with('.L'): # default rig, example: toe4-1.R
+					#new_bone_id = skeleton_data.keys().find("toe1-1.L")
+				#elif bone_name.ends_with('.R'):
+					#new_bone_id = skeleton_data.keys().find("toe1-1.R")
+				#else:
+					#printerr("Unhandled bone " + bone_name)
+		#group_index.append(new_bone_id)
+	#for bone_name in bone_weights.names:
+		#var new_id = skeleton_data.keys().find(bone_name)
+		#group_index.append(new_id)
+	
 func retarget_bone_names():
 	retarget_names.clear()
 	#first bone will either be Root or Hips
