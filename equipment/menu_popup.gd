@@ -42,10 +42,7 @@ func init_options():
 	%SkeletonOptions.add_item(" -- Select Skeleton --")
 	var rigs = HumanizerRegistry.rigs
 	for rig in rigs:
-		if rigs[rig].skeleton_retargeted_path != '':
-			%SkeletonOptions.add_item(rig + '-RETARGETED')
-		if rigs[rig].skeleton_path != '':
-			%SkeletonOptions.add_item(rig)
+		%SkeletonOptions.add_item(rig)
 	%SkeletonOptions.item_selected.connect(fill_bone_options)		
 	#fill_options()
 	
@@ -82,7 +79,7 @@ func fill_bone_options(idx:int):
 	var rig_name = %SkeletonOptions.get_item_text(idx)
 	var retargeted: bool = rig_name.ends_with('-RETARGETED')
 	var rig = HumanizerRigService.get_rig(rig_name)
-	var skeleton_data = HumanizerRigService.init_skeleton_data(rig,retargeted)
+	var skeleton_data = rig.init_skeleton_data()
 	for bone_name in skeleton_data:
 		%BoneOptions.add_item(bone_name)
 		

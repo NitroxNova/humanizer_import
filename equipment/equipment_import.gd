@@ -180,13 +180,13 @@ static func _calculate_attached_bone_weights(mhclo:MHCLO,import_settings:Diction
 	equip_type.rig_config = HumanizerEquipmentRigConfig.new()
 	equip_type.rig_config.config = rigged_bone_weights.config
 	equip_type.rig_config.attach_bones = import_settings.attach_bones
+	equip_type.rig_config.bones = rigged_bone_weights.bones
+	equip_type.rig_config.weights = rigged_bone_weights.weights
+	
 	if import_settings.attach_bones.is_empty():
 		printerr("No attach bones for " + equip_type.display_name)
 		
-	for rig_name in HumanizerRegistry.rigs:
-		var rig_bw = HumanizerEquipmentService.interpolate_rigged_weights(mhclo,rigged_bone_weights,rig_name)
-		equip_type.rig_config.bones[rig_name] = rig_bw.bones
-		equip_type.rig_config.weights[rig_name] = rig_bw.weights
+
 	
 static func _build_import_mesh(path: String, mhclo: MHCLO) -> ArrayMesh: 
 	# build basis from obj file
