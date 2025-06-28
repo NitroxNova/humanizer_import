@@ -219,13 +219,13 @@ func load_bone_weights(weights_file_path:String,contents:Dictionary):
 				
 	#normalize
 	for bw_array:Array in out_data:
-		while bw_array.size() > 8:
-			#remove lowest weight until array size is 8
-			var lowest = bw_array[0]
-			for bw_pair in bw_array:
-				if bw_pair[1] < lowest[1]:
-					lowest=bw_pair
-			bw_array.erase(lowest)
+		#while bw_array.size() > 8:
+			##remove lowest weight until array size is 8
+			#var lowest = bw_array[0]
+			#for bw_pair in bw_array:
+				#if bw_pair[1] < lowest[1]:
+					#lowest=bw_pair
+			#bw_array.erase(lowest)
 		#then normalize
 		var weight_sum = 0
 		for bw_pair in bw_array:
@@ -233,25 +233,7 @@ func load_bone_weights(weights_file_path:String,contents:Dictionary):
 		for bw_pair in bw_array:
 			bw_pair[1] /= weight_sum
 				
-			
 	rig.weights = out_data
-	
-	## Build cross reference dicts to easily map between a vertex group index and # a vertex group name
-	#var group_index = []
-	#for bone_name in bone_weights.names:
-		#var new_bone_id = skeleton_data.keys().find(bone_name)
-		#if new_bone_id == -1:
-			#if bone_name.begins_with('toe'):
-				#if bone_name.ends_with('.L'): # default rig, example: toe4-1.R
-					#new_bone_id = skeleton_data.keys().find("toe1-1.L")
-				#elif bone_name.ends_with('.R'):
-					#new_bone_id = skeleton_data.keys().find("toe1-1.R")
-				#else:
-					#printerr("Unhandled bone " + bone_name)
-		#group_index.append(new_bone_id)
-	#for bone_name in bone_weights.names:
-		#var new_id = skeleton_data.keys().find(bone_name)
-		#group_index.append(new_id)
 
 func find_reference_recursive(bone_name:String,weights_reference:Dictionary,df_skeleton:Skeleton3D):		
 	var df_bone_id = df_skeleton.find_bone(bone_name)
