@@ -219,13 +219,13 @@ func load_bone_weights(weights_file_path:String,contents:Dictionary):
 				
 	#normalize
 	for bw_array:Array in out_data:
-		#while bw_array.size() > 8:
-			##remove lowest weight until array size is 8
-			#var lowest = bw_array[0]
-			#for bw_pair in bw_array:
-				#if bw_pair[1] < lowest[1]:
-					#lowest=bw_pair
-			#bw_array.erase(lowest)
+		while bw_array.size() > 8:
+			#remove lowest weight until array size is 8
+			var lowest = bw_array[0]
+			for bw_pair in bw_array:
+				if bw_pair[1] < lowest[1]:
+					lowest=bw_pair
+			bw_array.erase(lowest)
 		#then normalize
 		var weight_sum = 0
 		for bw_pair in bw_array:
