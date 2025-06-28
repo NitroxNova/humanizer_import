@@ -99,9 +99,9 @@ popup/item_3/text = "game_engine-RETARGETED"
 popup/item_3/id = 3
 popup/item_4/text = "game_engine"
 popup/item_4/id = 4
-popup/item_5/text = "mixamo-RETARGETED"
+popup/item_5/text = "unity_with_bbp-RETARGETED"
 popup/item_5/id = 5
-popup/item_6/text = "mixamo"
+popup/item_6/text = "unity_with_bbp"
 popup/item_6/id = 6
 
 [node name="BoneOptions" type="OptionButton" parent="ImportOptions/AddBone"]

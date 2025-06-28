@@ -3,7 +3,6 @@ extends Resource
 class_name Skeleton_Reader
 
 var input_folder : String 
-var contents : Dictionary
 var skeleton : Skeleton3D
 var retarget_names : Dictionary
 var vertex_groups : Dictionary = OSPath.read_json("res://addons/humanizer/data/resources/basemesh_vertex_groups.json")
@@ -27,18 +26,20 @@ func _init(_folder:String):
 	if weights_file_path == "":
 		printerr("couldnt find weights config in " + input_folder)
 		return
-	print(config_file_path)
-	contents = OSPath.read_json(config_file_path)
-	if "bones" in contents:
-		contents = contents.bones
+	print(weights_file_path)
+	var contents = OSPath.read_json(config_file_path)
+	#if "bones" in contents:
+		#contents = contents.bones
+	if "bones" not in contents:
+		contents = {bones=contents}
 	
 	rig = HumanizerRig.new()
 	skeleton = Skeleton3D.new()
 	skeleton.name = "General_Skeleton"
-	for bone_name in contents:
-		var bone_id = recursive_add_bone(bone_name)
-	load_bone_config()
-	load_bone_weights(weights_file_path)
+	for bone_name in contents.bones:
+		var bone_id = recursive_add_bone(bone_name,contents)
+	load_bone_config(contents)
+	load_bone_weights(weights_file_path,contents)
 	var helpers = HumanizerTargetService.init_helper_vertex()
 	#have to set bone rotations before initing the data, then can set positions
 	set_bone_rotations(helpers,skeleton)
@@ -64,7 +65,9 @@ func set_bone_rotations(helper_vertex:Array,skeleton:Skeleton3D):
 		#print(bone_name)
 		var head_position = HumanizerRigService.get_bone_position_from_config(rig,bone_id,"head",helper_vertex)
 		var tail_position = HumanizerRigService.get_bone_position_from_config(rig,bone_id,"tail",helper_vertex)
-		var roll = rig.config[bone_id].roll
+		var roll = 0
+		if "roll" in rig.config[bone_id]:
+			roll = rig.config[bone_id].roll
 		var bone_rotation = get_bone_quat_from_position_roll(head_position,tail_position,roll)
 		var bone_matrix = Basis(Vector3(bone_rotation[0][0],bone_rotation[0][1],bone_rotation[0][2]),Vector3(bone_rotation[1][0],bone_rotation[1][1],bone_rotation[1][2]),Vector3(bone_rotation[2][0],bone_rotation[2][1],bone_rotation[2][2]))
 		#print("matrix world")
@@ -88,14 +91,15 @@ func set_bone_rotations(helper_vertex:Array,skeleton:Skeleton3D):
 		skeleton.set_bone_rest(bone_id,Transform3D(Basis(quat),Vector3.ZERO))
 		#print()
 		
-func recursive_add_bone(bone_name):
-	var bone_data = contents[bone_name]
+func recursive_add_bone(bone_name:String,contents:Dictionary):
+	var bone_data = contents.bones[bone_name]
 	var safe_name = safe_bone_name(bone_name)
 	var parent_id = -1
-	if "parent" in bone_data and bone_data.parent != "":
+	if "parent" in bone_data and bone_data.parent != "" and bone_data.parent != null:
+		#print(bone_data.parent)
 		parent_id = skeleton.find_bone(safe_bone_name(bone_data.parent))
 		if parent_id == -1:
-			recursive_add_bone(bone_data.parent)
+			recursive_add_bone(bone_data.parent,contents)
 		parent_id = skeleton.find_bone(safe_bone_name(bone_data.parent))
 	var bone_id = skeleton.find_bone(safe_name)
 	if bone_id == -1:
@@ -111,25 +115,32 @@ func safe_bone_name(bone_name:String):
 	safe_name = safe_name.replace(".","_")
 	return safe_name	
 
-func load_bone_config():
+func load_bone_config(contents:Dictionary):
 	# Create skeleton config		
 	rig.config.resize(skeleton.get_bone_count())
-	for in_name in contents:
+	for in_name in contents.bones:
 		var out_name = safe_bone_name(in_name)
 		var bone_id = skeleton.find_bone(out_name)
 		if bone_id > -1:
-			var parent_name = safe_bone_name( contents[in_name].parent)
-			var parent_id = skeleton.find_bone(parent_name)
-			rig.config[bone_id] = contents[in_name]
+			var parent_name = contents.bones[in_name].parent
+			var parent_id = -1
+			if parent_name != null and parent_name != "":
+				parent_name = safe_bone_name(parent_name)
+				parent_id = skeleton.find_bone(parent_name)
+			rig.config[bone_id] = contents.bones[in_name]
 			rig.config[bone_id].parent = parent_id
-			rig.config[bone_id].head.vertex_indices = get_vertex_indices(rig.config[bone_id].head)
-			rig.config[bone_id].tail.vertex_indices = get_vertex_indices(rig.config[bone_id].tail)
+			rig.config[bone_id].head = get_vertex_indices(contents,in_name,"head")
+			rig.config[bone_id].tail = get_vertex_indices(contents,in_name,"tail")
 			#rig.config_json_path = dir.path_join('skeleton_config.json')
 			#HumanizerResourceService.save_resource(rig.config_json_path, rig_config)
 
-func get_vertex_indices(config:Dictionary):
+func get_vertex_indices(contents:Dictionary,bone_name:String,head:String):
 	var vertex_indices = []
-	if config.strategy == "CUBE":
+	var config = contents.bones[bone_name][head] #or tail..
+	if config is String:
+		#old format, get from joints in config
+		vertex_indices = contents.joints[config]
+	elif config.strategy == "CUBE":
 		var cube_range = vertex_groups[config.cube_name][0]
 		var cube_index = []
 		for i in range(cube_range[0], cube_range[1] + 1):
@@ -140,21 +151,58 @@ func get_vertex_indices(config:Dictionary):
 	else:
 		vertex_indices.append(config.vertex_index)
 	return vertex_indices
-	
 
-func load_bone_weights(weights_file_path:String):
+func get_weights_reference(contents:Dictionary):
+	var references = {}
+	for bone_name in contents.bones:
+		var bone_config = contents.bones[bone_name]
+		var ref_array = []
+		if "weights_reference" in bone_config:
+			ref_array = bone_config.weights_reference
+		elif "reference" in bone_config and bone_config.reference != null:
+			ref_array = bone_config.reference
+		for ref_name in ref_array:
+			var safe_ref_name = safe_bone_name(ref_name)
+			if safe_ref_name not in references:
+				references[safe_ref_name] = []
+				#printerr("bone already has reference " + ref_name)
+			references[safe_ref_name].append( skeleton.find_bone( safe_bone_name(bone_name)))
+	return references		
+
+func load_bone_weights(weights_file_path:String,contents:Dictionary):
+	# old format
+	var weight_references = get_weights_reference(contents)
 	# Get bone weights for clothes
 	var out_data := []
 	out_data.resize(HumanizerTargetService.basis.size())
 	for i in out_data.size():
 		out_data[i] = []
 	
-	var skeleton_weights = HumanizerResourceService.load_resource(weights_file_path).weights
-	for bone_name in skeleton_weights:
-		var bone_id = skeleton.find_bone(safe_bone_name(bone_name))
-		for id_weight_pair in skeleton_weights[bone_name]:
-			out_data[id_weight_pair[0]].append([bone_id,id_weight_pair[1]])
+	var skeleton_weights = OSPath.read_json(weights_file_path).weights
 	
+	for bone_name in skeleton_weights:
+		var ref_array = []
+		var safe_bone_name = safe_bone_name(bone_name)
+		if safe_bone_name in weight_references:
+			ref_array = weight_references[safe_bone_name]
+		else:	
+			var bone_id = skeleton.find_bone(safe_bone_name)
+			if bone_id > -1:
+				ref_array.append(bone_id)
+			else:
+				if not skeleton_weights[bone_name].is_empty():
+					#printerr("bone not found " + bone_name)
+					#find the bone in the default skeleton get the parent from the reference?
+					#idk if this is right but i dont want to step through the makehuman source code right now
+					#requires defualt rig in humanizer folder
+					var default_skeleton : Skeleton3D = HumanizerRegistry.rigs["default"].load_skeleton()
+					ref_array = find_reference_recursive(safe_bone_name,weight_references,default_skeleton)
+					
+		for ref_id in ref_array:	
+			for id_weight_pair in skeleton_weights[bone_name]:
+				#need to combine since some bones reference the same 
+				out_data[id_weight_pair[0]].append([ref_id,id_weight_pair[1]/ref_array.size()])
+				
 	#normalize
 	for bw_array in out_data:
 		var weight_sum = 0
@@ -180,6 +228,14 @@ func load_bone_weights(weights_file_path:String):
 	#for bone_name in bone_weights.names:
 		#var new_id = skeleton_data.keys().find(bone_name)
 		#group_index.append(new_id)
+
+func find_reference_recursive(bone_name:String,weights_reference:Dictionary,df_skeleton:Skeleton3D):		
+	var df_bone_id = df_skeleton.find_bone(bone_name)
+	var df_parent_id = df_skeleton.get_bone_parent(df_bone_id)
+	var df_parent_name = df_skeleton.get_bone_name(df_parent_id)
+	if df_parent_name in weights_reference:
+		return weights_reference[df_parent_name]
+	return find_reference_recursive(df_parent_name,weights_reference,df_skeleton)
 	
 func retarget_bone_names():
 	retarget_names.clear()
@@ -211,11 +267,12 @@ func retarget_bone_names():
 	if spine_id > -1:
 		retarget_names["Spine"] = spine_id
 	var spine_stack
+	#get spine and chest stack
 	if "Spine" in retarget_names:
-		spine_stack = get_bone_stack(retarget_names["Spine"],["spine"],"center")
+		spine_stack = get_bone_stack(retarget_names["Spine"],["spine","chest"],"center")
 	else:
-		spine_stack = get_bone_stack(retarget_names["Hips"],["spine"],"center")
-	#TODO search for "chest" as well
+		spine_stack = get_bone_stack(retarget_names["Hips"],["spine","chest"],"center")
+	
 	retarget_names["UpperChest"] = spine_stack.pop_back()
 	retarget_names["Chest"] = spine_stack.pop_back()
 	if "Spine" not in retarget_names:
@@ -237,7 +294,7 @@ func retarget_bone_names():
 			retarget_names[side+"Eye"] = eye_bone
 		#legs
 		retarget_names[side+"UpperLeg"] = get_child_bone_with_pattern_recursive(retarget_names["Hips"],["leg","thigh"],side.to_lower(),2) 
-		retarget_names[side+"LowerLeg"] = get_child_bone_with_pattern_recursive(retarget_names[side+"UpperLeg"],["lowerleg","calf"],side.to_lower(),2) 
+		retarget_names[side+"LowerLeg"] = get_child_bone_with_pattern_recursive(retarget_names[side+"UpperLeg"],["lowerleg","calf","shin"],side.to_lower(),2) 
 		if retarget_names[side+"LowerLeg"] == null:
 			#mixamo and cmu_mb
 			retarget_names[side+"LowerLeg"] = get_child_bone_with_pattern_recursive(retarget_names[side+"UpperLeg"],["leg"],side.to_lower(),2) 
