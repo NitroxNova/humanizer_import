@@ -209,15 +209,31 @@ func load_bone_weights(weights_file_path:String,contents:Dictionary):
 			for ref_id in ref_array:	
 				for id_weight_pair in skeleton_weights[bone_name]:
 					#need to combine since some bones reference the same 
-					out_data[id_weight_pair[0]].append([ref_id,id_weight_pair[1]/ref_array.size()])
+					var ref_id_found = false
+					for existing_pair in out_data[id_weight_pair[0]]: #arrays are passed by reference
+						if existing_pair[0] == ref_id:
+							existing_pair[1] += id_weight_pair[1]/ref_array.size()
+							ref_id_found = true
+					if not ref_id_found:
+						out_data[id_weight_pair[0]].append([ref_id,id_weight_pair[1]/ref_array.size()])
 				
 	#normalize
-	for bw_array in out_data:
+	for bw_array:Array in out_data:
+		while bw_array.size() > 8:
+			#remove lowest weight until array size is 8
+			var lowest = bw_array[0]
+			for bw_pair in bw_array:
+				if bw_pair[1] < lowest[1]:
+					lowest=bw_pair
+			bw_array.erase(lowest)
+		#then normalize
 		var weight_sum = 0
 		for bw_pair in bw_array:
 			weight_sum += bw_pair[1]
 		for bw_pair in bw_array:
 			bw_pair[1] /= weight_sum
+				
+			
 	rig.weights = out_data
 	
 	## Build cross reference dicts to easily map between a vertex group index and # a vertex group name
