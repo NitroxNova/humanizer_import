@@ -2,16 +2,33 @@
 extends Resource
 class_name Skeleton_Reader
 
-var file_path : String 
+var input_folder : String 
 var contents : Dictionary
 var skeleton : Skeleton3D
 var retarget_names : Dictionary
 var vertex_groups : Dictionary = OSPath.read_json("res://addons/humanizer/data/resources/basemesh_vertex_groups.json")
 var rig : HumanizerRig
 
-func _init(_file_path:String):
-	file_path = _file_path
-	contents = OSPath.read_json(file_path)
+func _init(_folder:String):
+	input_folder = _folder
+	var skeleton_name = input_folder.get_file()
+	var config_file_path = ""
+	var weights_file_path = ""
+	
+	var input_files = DirAccess.get_files_at(input_folder)
+	for file_name in input_files:
+		if file_name.begins_with("rig.") or file_name.ends_with(".mhskel"):
+			config_file_path = input_folder.path_join(file_name)
+		elif file_name.begins_with("weights.") or file_name.ends_with(".mhw"):
+			weights_file_path = input_folder.path_join(file_name)
+	if config_file_path == "":
+		printerr("couldnt find rig config in " + input_folder)
+		return
+	if weights_file_path == "":
+		printerr("couldnt find weights config in " + input_folder)
+		return
+	print(config_file_path)
+	contents = OSPath.read_json(config_file_path)
 	if "bones" in contents:
 		contents = contents.bones
 	
@@ -21,7 +38,7 @@ func _init(_file_path:String):
 	for bone_name in contents:
 		var bone_id = recursive_add_bone(bone_name)
 	load_bone_config()
-	load_bone_weights()
+	load_bone_weights(weights_file_path)
 	var helpers = HumanizerTargetService.init_helper_vertex()
 	#have to set bone rotations before initing the data, then can set positions
 	set_bone_rotations(helpers,skeleton)
@@ -30,8 +47,7 @@ func _init(_file_path:String):
 	HumanizerRigService.adjust_skeleton_3D(skeleton,skeleton_data)
 	retarget_bone_names()
 	
-	var rig_save_path = file_path.replace("res://data/input/skeleton","res://humanizer/skeleton")
-	rig_save_path = rig_save_path.replace(".json",".res")
+	var rig_save_path = "res://humanizer/skeleton".path_join(skeleton_name) + ".res"
 	if not DirAccess.dir_exists_absolute(rig_save_path.get_base_dir()):
 		DirAccess.make_dir_absolute(rig_save_path.get_base_dir())
 	
@@ -126,14 +142,14 @@ func get_vertex_indices(config:Dictionary):
 	return vertex_indices
 	
 
-func load_bone_weights():
+func load_bone_weights(weights_file_path:String):
 	# Get bone weights for clothes
 	var out_data := []
 	out_data.resize(HumanizerTargetService.basis.size())
 	for i in out_data.size():
 		out_data[i] = []
 	
-	var skeleton_weights = HumanizerResourceService.load_resource(file_path.replace("rig.","weights.")).weights
+	var skeleton_weights = HumanizerResourceService.load_resource(weights_file_path).weights
 	for bone_name in skeleton_weights:
 		var bone_id = skeleton.find_bone(safe_bone_name(bone_name))
 		for id_weight_pair in skeleton_weights[bone_name]:

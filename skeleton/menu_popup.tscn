@@ -1,0 +1,42 @@
+[gd_scene load_steps=2 format=3 uid="uid://bdrdnbfwakvv4"]
+
+[ext_resource type="Script" uid="uid://bmlwxthfrflcv" path="res://addons/humanizer_import/skeleton/menu_popup.gd" id="1_poxyx"]
+
+[node name="Window" type="Window"]
+initial_position = 2
+size = Vector2i(229, 100)
+script = ExtResource("1_poxyx")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="SelectSkeletonButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Select Skeleton"
+
+[node name="SkeletonName" type="Label" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "No Skeleton Selected"
+
+[node name="ImportButton" type="Button" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+disabled = true
+text = "Import"
+
+[node name="Skeleton_FileDialog" type="FileDialog" parent="."]
+unique_name_in_owner = true
+title = "Open a Directory"
+ok_button_text = "Select Current Folder"
+file_mode = 2
+root_subfolder = "data/input/skeleton"
+
+[node name="Skeleton" type="Node3D" parent="."]
+unique_name_in_owner = true
+
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]
+[connection signal="pressed" from="VBoxContainer/SelectSkeletonButton" to="." method="_on_select_skeleton_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/ImportButton" to="." method="_on_import_button_pressed"]
+[connection signal="dir_selected" from="Skeleton_FileDialog" to="." method="_on_skeleton_file_dialog_dir_selected"]

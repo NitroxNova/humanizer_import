@@ -31,6 +31,8 @@ func _add_tool_submenu():
 	popup_menu.add_item("Categorize Slots")
 	popup_menu.set_item_metadata(popup_menu.item_count-1,run_categorizer)
 
+	popup_menu.add_item("Skeleton")
+	popup_menu.set_item_metadata(popup_menu.item_count-1,run_skeleton_importer)
 	
 	popup_menu.add_item("Targets")
 	popup_menu.set_item_metadata(popup_menu.item_count-1,run_target_importer)
@@ -84,6 +86,9 @@ func run_target_importer():
 	var popup = load("res://addons/humanizer_import/target/menu_popup.tscn").instantiate()
 	get_editor_interface().call_deferred("popup_dialog",popup)
 
+func run_skeleton_importer():
+	var popup = load("res://addons/humanizer_import/skeleton/menu_popup.tscn").instantiate()
+	get_editor_interface().call_deferred("popup_dialog",popup)	
 
 func generate_zip():
 	var popup = load("res://addons/humanizer_import/pack/popup.tscn").instantiate()

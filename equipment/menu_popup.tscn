@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://u0jkofojnuqa"]
 
-[ext_resource type="Script" path="res://addons/humanizer_import/equipment/menu_popup.gd" id="1_aksm7"]
+[ext_resource type="Script" uid="uid://dy33d7c7vaonj" path="res://addons/humanizer_import/equipment/menu_popup.gd" id="1_aksm7"]
 
 [node name="Popup" type="Window"]
 title = "Import Equipment"
@@ -90,17 +90,18 @@ layout_mode = 2
 selected = 0
 item_count = 7
 popup/item_0/text = " -- Select Skeleton --"
-popup/item_1/text = "mixamo-RETARGETED"
+popup/item_0/id = 0
+popup/item_1/text = "default-RETARGETED"
 popup/item_1/id = 1
-popup/item_2/text = "mixamo"
+popup/item_2/text = "default"
 popup/item_2/id = 2
 popup/item_3/text = "game_engine-RETARGETED"
 popup/item_3/id = 3
 popup/item_4/text = "game_engine"
 popup/item_4/id = 4
-popup/item_5/text = "default-RETARGETED"
+popup/item_5/text = "mixamo-RETARGETED"
 popup/item_5/id = 5
-popup/item_6/text = "default"
+popup/item_6/text = "mixamo"
 popup/item_6/id = 6
 
 [node name="BoneOptions" type="OptionButton" parent="ImportOptions/AddBone"]

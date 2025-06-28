@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://blblsqswg8rc0"]
 
-[ext_resource type="Script" uid="uid://136jfoy4el5s" path="res://addons/humanizer_import/categorizer/categorizer.gd" id="1_wp3k4"]
+[ext_resource type="Script" uid="uid://dbtidvwcm4ivb" path="res://addons/humanizer_import/categorizer/categorizer.gd" id="1_wp3k4"]
 [ext_resource type="PackedScene" uid="uid://jm3vldogu1f2" path="res://addons/humanizer_import/categorizer/linkButton.tscn" id="2_tufhu"]
 
 [node name="Categorizer" type="Window" node_paths=PackedStringArray("itemSelect", "parentSelect", "newCatName", "linkArea", "demoArea")]
@@ -44,6 +44,44 @@ text = "Item"
 [node name="ItemSelect" type="OptionButton" parent="HBoxContainer/VBoxContainer/Item"]
 layout_mode = 2
 size_flags_horizontal = 3
+selected = 0
+item_count = 18
+popup/item_0/text = "body"
+popup/item_0/id = 0
+popup/item_1/text = "eyebrows"
+popup/item_1/id = 1
+popup/item_2/text = "eyelashes"
+popup/item_2/id = 2
+popup/item_3/text = "eyes"
+popup/item_3/id = 3
+popup/item_4/text = "hair"
+popup/item_4/id = 4
+popup/item_5/text = "hats"
+popup/item_5/id = 5
+popup/item_6/text = "shoes"
+popup/item_6/id = 6
+popup/item_7/text = "teeth"
+popup/item_7/id = 7
+popup/item_8/text = "tongue"
+popup/item_8/id = 8
+popup/item_9/text = "body"
+popup/item_9/id = 9
+popup/item_10/text = "eyebrows"
+popup/item_10/id = 10
+popup/item_11/text = "eyelashes"
+popup/item_11/id = 11
+popup/item_12/text = "eyes"
+popup/item_12/id = 12
+popup/item_13/text = "hair"
+popup/item_13/id = 13
+popup/item_14/text = "hats"
+popup/item_14/id = 14
+popup/item_15/text = "shoes"
+popup/item_15/id = 15
+popup/item_16/text = "teeth"
+popup/item_16/id = 16
+popup/item_17/text = "tongue"
+popup/item_17/id = 17
 
 [node name="parent" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
 layout_mode = 2
@@ -56,7 +94,7 @@ text = "Category"
 layout_mode = 2
 size_flags_horizontal = 3
 selected = 0
-item_count = 78
+item_count = 80
 popup/item_0/text = "Root"
 popup/item_0/id = 0
 popup/item_1/text = "bodyparts"
@@ -213,6 +251,10 @@ popup/item_76/text = "teeth"
 popup/item_76/id = 76
 popup/item_77/text = "tongue"
 popup/item_77/id = 77
+popup/item_78/text = "Root"
+popup/item_78/id = 78
+popup/item_79/text = "Root"
+popup/item_79/id = 79
 
 [node name="HSeparator3" type="HSeparator" parent="HBoxContainer/VBoxContainer"]
 layout_mode = 2
@@ -321,23 +363,11 @@ layout_mode = 2
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-current_tab = 0
 
 [connection signal="close_requested" from="." to="." method="_on_close_requested"]
 [connection signal="pressed" from="HBoxContainer/VBoxContainer/itemmanagement/LinkButton" to="." method="_on_link_button_pressed"]
 [connection signal="pressed" from="HBoxContainer/VBoxContainer/itemmanagement/RemoveCategory" to="." method="_on_remove_category_pressed"]
 [connection signal="pressed" from="HBoxContainer/VBoxContainer/Link Management/RemoveLink" to="." method="_on_remove_link_pressed"]
-[connection signal="toggled" from="HBoxContainer/VBoxContainer/ScrollContainer/links/LinkButton" to="HBoxContainer/VBoxContainer/ScrollContainer/links/LinkButton" method="_on_toggled"]
-[connection signal="toggled" from="HBoxContainer/VBoxContainer/ScrollContainer/links/@Button@21796" to="HBoxContainer/VBoxContainer/ScrollContainer/links/@Button@21796" method="_on_toggled"]
-[connection signal="toggled" from="HBoxContainer/VBoxContainer/ScrollContainer/links/@Button@21797" to="HBoxContainer/VBoxContainer/ScrollContainer/links/@Button@21797" method="_on_toggled"]
-[connection signal="toggled" from="HBoxContainer/VBoxContainer/ScrollContainer/links/@Button@21798" to="HBoxContainer/VBoxContainer/ScrollContainer/links/@Button@21798" method="_on_toggled"]
-[connection signal="toggled" from="HBoxContainer/VBoxContainer/ScrollContainer/links/@Button@21799" to="HBoxContainer/VBoxContainer/ScrollContainer/links/@Button@21799" method="_on_toggled"]
-[connection signal="toggled" from="HBoxContainer/VBoxContainer/ScrollContainer/links/@Button@21800" to="HBoxContainer/VBoxContainer/ScrollContainer/links/@Button@21800" method="_on_toggled"]
-[connection signal="toggled" from="HBoxContainer/VBoxContainer/ScrollContainer/links/@Button@21801" to="HBoxContainer/VBoxContainer/ScrollContainer/links/@Button@21801" method="_on_toggled"]
-[connection signal="toggled" from="HBoxContainer/VBoxContainer/ScrollContainer/links/@Button@21802" to="HBoxContainer/VBoxContainer/ScrollContainer/links/@Button@21802" method="_on_toggled"]
-[connection signal="toggled" from="HBoxContainer/VBoxContainer/ScrollContainer/links/@Button@21803" to="HBoxContainer/VBoxContainer/ScrollContainer/links/@Button@21803" method="_on_toggled"]
-[connection signal="toggled" from="HBoxContainer/VBoxContainer/ScrollContainer/links/@Button@21804" to="HBoxContainer/VBoxContainer/ScrollContainer/links/@Button@21804" method="_on_toggled"]
-[connection signal="toggled" from="HBoxContainer/VBoxContainer/ScrollContainer/links/@Button@21805" to="HBoxContainer/VBoxContainer/ScrollContainer/links/@Button@21805" method="_on_toggled"]
 [connection signal="pressed" from="HBoxContainer/VBoxContainer/categories/Create Category" to="." method="_on_create_category_pressed"]
 [connection signal="pressed" from="HBoxContainer/VBoxContainer/Buttons/save" to="." method="_on_save_pressed"]
 [connection signal="pressed" from="HBoxContainer/VBoxContainer/Buttons/export" to="." method="_on_export_pressed"]
