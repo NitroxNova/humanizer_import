@@ -171,7 +171,7 @@ func get_weights_reference(contents:Dictionary):
 
 func load_bone_weights(weights_file_path:String,contents:Dictionary):
 	# old format
-	var weight_references = get_weights_reference(contents)
+	var weights_reference = get_weights_reference(contents)
 	# Get bone weights for clothes
 	var out_data := []
 	out_data.resize(HumanizerTargetService.basis.size())
@@ -181,27 +181,35 @@ func load_bone_weights(weights_file_path:String,contents:Dictionary):
 	var skeleton_weights = OSPath.read_json(weights_file_path).weights
 	
 	for bone_name in skeleton_weights:
-		var ref_array = []
-		var safe_bone_name = safe_bone_name(bone_name)
-		if safe_bone_name in weight_references:
-			ref_array = weight_references[safe_bone_name]
-		else:	
-			var bone_id = skeleton.find_bone(safe_bone_name)
-			if bone_id > -1:
-				ref_array.append(bone_id)
-			else:
-				if not skeleton_weights[bone_name].is_empty():
+		if not skeleton_weights[bone_name].is_empty():
+			var ref_array = []
+			var safe_bone_name = safe_bone_name(bone_name)
+			if safe_bone_name in weights_reference:
+				ref_array = weights_reference[safe_bone_name]
+			else:	
+				var bone_id = skeleton.find_bone(safe_bone_name)
+				if bone_id > -1:
+					ref_array.append(bone_id)
+				elif not weights_reference.is_empty():
 					#printerr("bone not found " + bone_name)
 					#find the bone in the default skeleton get the parent from the reference?
 					#idk if this is right but i dont want to step through the makehuman source code right now
 					#requires defualt rig in humanizer folder
 					var default_skeleton : Skeleton3D = HumanizerRegistry.rigs["default"].load_skeleton()
-					ref_array = find_reference_recursive(safe_bone_name,weight_references,default_skeleton)
-					
-		for ref_id in ref_array:	
-			for id_weight_pair in skeleton_weights[bone_name]:
-				#need to combine since some bones reference the same 
-				out_data[id_weight_pair[0]].append([ref_id,id_weight_pair[1]/ref_array.size()])
+					ref_array = find_reference_recursive(safe_bone_name,weights_reference,default_skeleton)
+				else:
+					if safe_bone_name.begins_with('toe'):
+						if safe_bone_name.ends_with('_L'): # default rig, example: toe4-1.R
+							ref_array = [skeleton.find_bone("toe1-1_L")]
+						elif safe_bone_name.ends_with('_R'):
+							ref_array = [skeleton.find_bone("toe1-1_R")]
+						else:
+							printerr("Unhandled bone " + bone_name)	
+						
+			for ref_id in ref_array:	
+				for id_weight_pair in skeleton_weights[bone_name]:
+					#need to combine since some bones reference the same 
+					out_data[id_weight_pair[0]].append([ref_id,id_weight_pair[1]/ref_array.size()])
 				
 	#normalize
 	for bw_array in out_data:
