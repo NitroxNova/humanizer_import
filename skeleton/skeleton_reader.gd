@@ -217,21 +217,16 @@ func load_bone_weights(weights_file_path:String,contents:Dictionary):
 					if not ref_id_found:
 						out_data[id_weight_pair[0]].append([ref_id,id_weight_pair[1]/ref_array.size()])
 				
-	#normalize
+	##normalize
 	for bw_array:Array in out_data:
-		while bw_array.size() > 8:
-			#remove lowest weight until array size is 8
-			var lowest = bw_array[0]
-			for bw_pair in bw_array:
-				if bw_pair[1] < lowest[1]:
-					lowest=bw_pair
-			bw_array.erase(lowest)
-		#then normalize
-		var weight_sum = 0
+		#dont remove greater than 8 , since blender can have more, dont reduce until needed
+		#cap between 0 and 1	
 		for bw_pair in bw_array:
-			weight_sum += bw_pair[1]
-		for bw_pair in bw_array:
-			bw_pair[1] /= weight_sum
+			if bw_pair[1] < 0:
+				bw_pair[1] = 0
+			elif bw_pair[1] > 1:
+				bw_pair[1] = 1
+		#dont normalize, blender stores as unormalized (but displays as normalized?)
 				
 	rig.weights = out_data
 
